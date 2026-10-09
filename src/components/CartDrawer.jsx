@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../data/products';
 import {
   X,
   ShoppingBag,
@@ -88,7 +89,7 @@ export const CartDrawer = () => {
           ) : (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-neutral-300 font-mono text-[11px]">
-                <span>Add ${amountNeededForFreeShipping.toFixed(2)} more for Free Shipping</span>
+                <span>Add {formatPrice(amountNeededForFreeShipping)} more for Free Shipping</span>
                 <span>{Math.round(freeShippingProgress)}%</span>
               </div>
               <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -127,11 +128,11 @@ export const CartDrawer = () => {
                 className="p-3.5 rounded-xl bg-neutral-900/40 border border-neutral-850 flex gap-3.5 items-start"
               >
                 {/* Thumbnail */}
-                <div className="w-16 h-16 rounded-lg bg-neutral-950 overflow-hidden shrink-0 border border-neutral-800">
+                <div className="w-16 h-16 rounded-lg bg-neutral-950 overflow-hidden shrink-0 border border-neutral-800 p-1 flex items-center justify-center">
                   <img
                     src={item.product.images[0]}
                     alt={item.product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
@@ -189,7 +190,7 @@ export const CartDrawer = () => {
                     {/* Price */}
                     <div className="text-right">
                       <span className="font-mono font-bold text-sm text-white">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.product.price * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -239,23 +240,23 @@ export const CartDrawer = () => {
             <div className="space-y-1.5 text-xs text-neutral-400 font-mono">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="text-white">${subtotal.toFixed(2)}</span>
+                <span className="text-white">{formatPrice(subtotal)}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-cyan-400">
                   <span>Discount</span>
-                  <span>-${discountAmount.toFixed(2)}</span>
+                  <span>-{formatPrice(discountAmount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Estimated Shipping</span>
                 <span className="text-white">
-                  {standardShippingCost === 0 ? 'FREE' : `$${standardShippingCost.toFixed(2)}`}
+                  {standardShippingCost === 0 ? 'FREE' : formatPrice(standardShippingCost)}
                 </span>
               </div>
               <div className="flex justify-between pt-2 border-t border-neutral-850 text-sm font-bold text-white">
                 <span>Total</span>
-                <span className="text-cyan-300">${finalTotal.toFixed(2)}</span>
+                <span className="text-cyan-300">{formatPrice(finalTotal)}</span>
               </div>
             </div>
 

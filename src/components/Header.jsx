@@ -70,7 +70,7 @@ export const Header = () => {
           </div>
           <div className="hidden sm:flex items-center gap-5 text-neutral-400 text-[11px] font-mono">
             <span className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer" onClick={() => navigateTo('shop')}>
-              <Zap className="w-3.5 h-3.5 text-cyan-400" /> Free Express Shipping Over $50
+              <Zap className="w-3.5 h-3.5 text-cyan-400" /> Free Express Shipping Over 300 DH
             </span>
             <span className="text-neutral-700">|</span>
             <span className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer" onClick={() => setIsContactOpen(true)}>

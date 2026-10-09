@@ -1,6 +1,6 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, formatPrice } from '../data/products';
 import { X, Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 
 export const WishlistDrawer = () => {
@@ -75,7 +75,7 @@ export const WishlistDrawer = () => {
               >
                 {/* Image */}
                 <div
-                  className="w-16 h-16 rounded-lg bg-neutral-950 overflow-hidden shrink-0 border border-neutral-800 cursor-pointer"
+                  className="w-16 h-16 rounded-lg bg-neutral-950 overflow-hidden shrink-0 border border-neutral-800 cursor-pointer p-1 flex items-center justify-center"
                   onClick={() => {
                     setIsWishlistOpen(false);
                     navigateTo('product-detail', product);
@@ -84,7 +84,7 @@ export const WishlistDrawer = () => {
                   <img
                     src={product.images[0]}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
@@ -111,7 +111,7 @@ export const WishlistDrawer = () => {
 
                   <div className="flex items-center justify-between mt-2">
                     <span className="font-mono font-bold text-xs sm:text-sm text-cyan-300">
-                      ${product.price.toFixed(2)}
+                      {formatPrice(product.price)}
                     </span>
 
                     <button

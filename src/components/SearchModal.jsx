@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, formatPrice } from '../data/products';
 import { Search, X, ArrowRight, Sparkles, Star } from 'lucide-react';
 
 export const SearchModal = () => {
@@ -158,14 +158,14 @@ export const SearchModal = () => {
                     <img
                       src={product.images[0]}
                       alt=""
-                      className="w-12 h-12 rounded-lg object-cover bg-neutral-950 border border-neutral-800 shrink-0"
+                      className="w-12 h-12 rounded-lg object-contain bg-neutral-950 border border-neutral-800 shrink-0 p-1"
                     />
                     <div className="min-w-0">
                       <div className="text-xs sm:text-sm font-bold text-white truncate">
                         {product.name}
                       </div>
                       <div className="text-[11px] text-neutral-400 font-mono">
-                        {product.category} • ${product.price.toFixed(2)}
+                        {product.category} • {formatPrice(product.price)}
                       </div>
                     </div>
                   </div>

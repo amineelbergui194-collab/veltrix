@@ -71,10 +71,10 @@ export const ShopPage = () => {
       }
 
       // Price filter
-      if (priceRange === 'under-35' && item.price >= 35) return false;
-      if (priceRange === '35-100' && (item.price < 35 || item.price > 100)) return false;
-      if (priceRange === '100-300' && (item.price < 100 || item.price > 300)) return false;
-      if (priceRange === '300-plus' && item.price <= 300) return false;
+      if (priceRange === 'under-100' && item.price >= 100) return false;
+      if (priceRange === '100-150' && (item.price < 100 || item.price > 150)) return false;
+      if (priceRange === '150-250' && (item.price < 150 || item.price > 250)) return false;
+      if (priceRange === '250-plus' && item.price < 250) return false;
 
       // Availability
       if (inStockOnly && !item.inStock) return false;
@@ -235,10 +235,10 @@ export const ShopPage = () => {
                 <div className="space-y-2 text-xs">
                   {[
                     { id: 'all', label: 'All Prices' },
-                    { id: 'under-35', label: 'Under $35' },
-                    { id: '35-100', label: '$35 — $100' },
-                    { id: '100-300', label: '$100 — $300' },
-                    { id: '300-plus', label: '$300 & Above' },
+                    { id: 'under-100', label: 'Under 100 DH' },
+                    { id: '100-150', label: '100 DH — 150 DH' },
+                    { id: '150-250', label: '150 DH — 250 DH' },
+                    { id: '250-plus', label: '250 DH & Above' },
                   ].map((p) => (
                     <label
                       key={p.id}

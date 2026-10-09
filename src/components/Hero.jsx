@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, formatPrice } from '../data/products';
 import {
   ArrowRight,
   Sparkles,
@@ -190,9 +190,9 @@ export const Hero = () => {
                   <img
                     src={activeHero.product.images[0]}
                     alt={activeHero.product.name}
-                    className="w-full h-full object-cover rounded-lg group-hover/img:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-contain p-2 rounded-lg group-hover/img:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent opacity-60 pointer-events-none" />
 
                   {/* Floating Quick Action Overlay */}
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
@@ -217,11 +217,11 @@ export const Hero = () => {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-xl font-bold font-mono text-white">
-                      ${activeHero.product.price.toFixed(2)}
+                      {formatPrice(activeHero.product.price)}
                     </div>
                     {activeHero.product.originalPrice && (
                       <span className="text-xs font-mono text-neutral-500 line-through">
-                        ${activeHero.product.originalPrice.toFixed(2)}
+                        {formatPrice(activeHero.product.originalPrice)}
                       </span>
                     )}
                   </div>

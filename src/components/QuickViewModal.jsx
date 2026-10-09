@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../data/products';
 import {
   X,
   Star,
@@ -65,7 +66,7 @@ export const QuickViewModal = () => {
               <img
                 src={product.images[selectedImage] || product.images[0]}
                 alt={product.name}
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-contain p-2 rounded-lg"
               />
             </div>
 
@@ -75,11 +76,11 @@ export const QuickViewModal = () => {
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden border cursor-pointer ${
+                  className={`w-12 h-12 rounded-lg overflow-hidden border cursor-pointer p-0.5 ${
                     selectedImage === i ? 'border-cyan-400 ring-1 ring-cyan-400' : 'border-neutral-800 opacity-60'
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={img} alt="" className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>
@@ -106,11 +107,11 @@ export const QuickViewModal = () => {
               {/* Price */}
               <div className="flex items-baseline gap-2 mb-4 pb-4 border-b border-neutral-850">
                 <span className="text-2xl font-bold font-mono text-white">
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </span>
                 {product.originalPrice && (
                   <span className="text-sm font-mono text-neutral-500 line-through">
-                    ${product.originalPrice.toFixed(2)}
+                    {formatPrice(product.originalPrice)}
                   </span>
                 )}
               </div>
@@ -166,7 +167,7 @@ export const QuickViewModal = () => {
                 className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-neutral-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/10"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Add to Cart — ${(product.price * qty).toFixed(2)}</span>
+                <span>Add to Cart — {formatPrice(product.price * qty)}</span>
               </button>
 
               <div className="flex gap-2">

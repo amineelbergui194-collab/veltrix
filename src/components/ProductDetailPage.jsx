@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, formatPrice } from '../data/products';
 import { ProductCard } from './ProductCard';
 import {
   Star,
@@ -132,7 +132,7 @@ export const ProductDetailPage = () => {
                   <img
                     src={img}
                     alt={`${product.name} thumbnail ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-1"
                   />
                 </button>
               ))}
@@ -143,7 +143,7 @@ export const ProductDetailPage = () => {
               <img
                 src={product.images[selectedImageIndex] || product.images[0]}
                 alt={product.name}
-                className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-contain rounded-xl transition-transform duration-700 group-hover:scale-105"
               />
 
               {/* Badges Overlay */}
@@ -235,16 +235,16 @@ export const ProductDetailPage = () => {
               {/* Price Block */}
               <div className="py-4 border-y border-neutral-800 flex items-baseline gap-3">
                 <span className="text-3xl font-extrabold font-mono text-white">
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </span>
                 {product.originalPrice && (
                   <span className="text-lg font-mono text-neutral-500 line-through">
-                    ${product.originalPrice.toFixed(2)}
+                    {formatPrice(product.originalPrice)}
                   </span>
                 )}
                 {discountPercent && (
                   <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                    Save ${(product.originalPrice - product.price).toFixed(2)} ({discountPercent}%)
+                    Save {formatPrice(product.originalPrice - product.price)} ({discountPercent}%)
                   </span>
                 )}
               </div>
@@ -307,7 +307,7 @@ export const ProductDetailPage = () => {
                   className="w-full py-4 px-6 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-neutral-950 font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20 group cursor-pointer"
                 >
                   <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span>Add to Cart — ${(product.price * quantity).toFixed(2)}</span>
+                  <span>Add to Cart — {formatPrice(product.price * quantity)}</span>
                 </button>
 
                 <button
@@ -324,7 +324,7 @@ export const ProductDetailPage = () => {
                 <div className="flex flex-col items-center gap-1 text-neutral-300">
                   <Truck className="w-4 h-4 text-cyan-400" />
                   <span className="font-semibold">Free Express</span>
-                  <span className="text-[10px] text-neutral-500">Orders $50+</span>
+                  <span className="text-[10px] text-neutral-500">Orders 300 DH+</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 text-neutral-300 border-x border-neutral-800">
                   <RotateCcw className="w-4 h-4 text-emerald-400" />
@@ -427,11 +427,11 @@ export const ProductDetailPage = () => {
                   <ul className="space-y-3 text-xs sm:text-sm text-neutral-300">
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2"></span>
-                      <span><strong>Standard Delivery:</strong> 3-5 business days. Free on all orders over $50.</span>
+                      <span><strong>Standard Delivery:</strong> 2-4 business days. Free on all orders over 300 DH.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2"></span>
-                      <span><strong>Express Priority:</strong> 1-2 business days with live GPS tracking for $9.99.</span>
+                      <span><strong>Express Priority:</strong> 1-2 business days with live tracking for 35 DH.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2"></span>

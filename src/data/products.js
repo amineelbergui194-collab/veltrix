@@ -1,10 +1,16 @@
+export const formatPrice = (amount) => {
+  if (amount === undefined || amount === null) return '0 DH';
+  const num = Number(amount);
+  return `${num % 1 === 0 ? num : num.toFixed(2)} DH`;
+};
+
 export const CATEGORIES = [
   {
     id: 'airpods',
     name: 'AirPods',
     tagline: 'Premium wireless audio for everyday listening.',
     count: '6 Products',
-    image: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80',
+    image: '/images/airpods-pro.png',
     iconName: 'Headphones',
   },
   {
@@ -12,7 +18,7 @@ export const CATEGORIES = [
     name: 'Headphones',
     tagline: 'Immersive sound and modern design.',
     count: '8 Products',
-    image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
+    image: '/images/jbl-headphones.jpg',
     iconName: 'Speaker',
   },
   {
@@ -20,7 +26,7 @@ export const CATEGORIES = [
     name: 'Apple Watch',
     tagline: 'Smart technology for your everyday life.',
     count: '7 Products',
-    image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80',
+    image: '/images/apple-watch-collection.png',
     iconName: 'Watch',
   },
   {
@@ -28,7 +34,7 @@ export const CATEGORIES = [
     name: 'Cables & Adapters',
     tagline: 'Reliable charging and connectivity.',
     count: '12 Products',
-    image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
+    image: '/images/usbc-cable.jpg',
     iconName: 'Zap',
   },
   {
@@ -36,7 +42,7 @@ export const CATEGORIES = [
     name: 'Accessories',
     tagline: 'Essential tech accessories for your devices.',
     count: '15 Products',
-    image: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=800&q=80',
+    image: '/images/power-adapter.jpg',
     iconName: 'Smartphone',
   },
 ];
@@ -48,8 +54,8 @@ export const PRODUCTS = [
     subtitle: 'Active Noise Cancellation with USB-C MagSafe Case',
     category: 'AirPods',
     categorySlug: 'airpods',
-    price: 249.00,
-    originalPrice: 279.00,
+    price: 120,
+    originalPrice: 150,
     rating: 4.9,
     reviewCount: 384,
     badge: 'BEST SELLER',
@@ -58,9 +64,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 14,
     images: [
-      'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=85'
+      '/images/airpods-pro.png'
     ],
     colors: [
       { name: 'White Gloss', hex: '#f8fafc', bg: 'bg-white' },
@@ -110,8 +114,8 @@ export const PRODUCTS = [
     subtitle: 'Next-Gen Wireless Earbuds with Precision Acoustic Chambers',
     category: 'AirPods',
     categorySlug: 'airpods',
-    price: 189.00,
-    originalPrice: 229.00,
+    price: 180,
+    originalPrice: 220,
     rating: 4.8,
     reviewCount: 192,
     badge: 'NEW',
@@ -120,9 +124,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 22,
     images: [
-      'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1608156639585-b3a032ef9689?auto=format&fit=crop&w=900&q=85'
+      '/images/airpods-pro.png'
     ],
     colors: [
       { name: 'Midnight Titanium', hex: '#1e293b', bg: 'bg-slate-800' },
@@ -163,8 +165,8 @@ export const PRODUCTS = [
     subtitle: 'Audiophile Over-Ear Headphones with 45mm Drivers',
     category: 'Headphones',
     categorySlug: 'headphones',
-    price: 299.00,
-    originalPrice: 349.00,
+    price: 110,
+    originalPrice: 150,
     rating: 4.9,
     reviewCount: 247,
     badge: 'STAFF PICK',
@@ -173,9 +175,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 9,
     images: [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=900&q=85'
+      '/images/jbl-headphones.jpg'
     ],
     colors: [
       { name: 'Space Black', hex: '#111827', bg: 'bg-neutral-900' },
@@ -216,8 +216,8 @@ export const PRODUCTS = [
     subtitle: 'Signature Pure Bass Sound with Multi-Device Connection',
     category: 'Headphones',
     categorySlug: 'headphones',
-    price: 129.95,
-    originalPrice: 159.95,
+    price: 110,
+    originalPrice: 140,
     rating: 4.7,
     reviewCount: 310,
     badge: 'POPULAR',
@@ -226,9 +226,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 18,
     images: [
-      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=900&q=85'
+      '/images/jbl-headphones.jpg'
     ],
     colors: [
       { name: 'Matte Black', hex: '#0a0a0a', bg: 'bg-black' },
@@ -269,8 +267,8 @@ export const PRODUCTS = [
     subtitle: 'Braided Kevlar Core with E-Marker Smart Chip (2m)',
     category: 'Cables & Adapters',
     categorySlug: 'cables-adapters',
-    price: 24.99,
-    originalPrice: 32.00,
+    price: 65,
+    originalPrice: 85,
     rating: 4.9,
     reviewCount: 421,
     badge: 'BEST SELLER',
@@ -279,8 +277,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 85,
     images: [
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=900&q=85'
+      '/images/usbc-cable.jpg'
     ],
     colors: [
       { name: 'Space Gray Braided', hex: '#4b5563', bg: 'bg-gray-600' },
@@ -320,8 +317,8 @@ export const PRODUCTS = [
     subtitle: 'MFi-Certified Duraflex Reinforced USB-C to Lightning',
     category: 'Cables & Adapters',
     categorySlug: 'cables-adapters',
-    price: 19.99,
-    originalPrice: 24.99,
+    price: 65,
+    originalPrice: 80,
     rating: 4.8,
     reviewCount: 388,
     badge: 'ESSENTIAL',
@@ -330,8 +327,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 64,
     images: [
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=900&q=85'
+      '/images/usbc-cable.jpg'
     ],
     colors: [
       { name: 'Silver White', hex: '#f8fafc', bg: 'bg-white' },
@@ -371,8 +367,8 @@ export const PRODUCTS = [
     subtitle: 'Compact Dual USB-C GaN Fast Charger for iPhone & Watch',
     category: 'Cables & Adapters',
     categorySlug: 'cables-adapters',
-    price: 34.99,
-    originalPrice: 44.99,
+    price: 70,
+    originalPrice: 95,
     rating: 4.9,
     reviewCount: 275,
     badge: 'TOP RATED',
@@ -381,8 +377,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 42,
     images: [
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=900&q=85'
+      '/images/power-adapter.jpg'
     ],
     colors: [
       { name: 'Matte White', hex: '#f8fafc', bg: 'bg-white' },
@@ -423,8 +418,8 @@ export const PRODUCTS = [
     subtitle: 'Rugged Titanium GPS + Cellular with Orange Alpine Loop',
     category: 'Apple Watch',
     categorySlug: 'apple-watch',
-    price: 779.00,
-    originalPrice: 799.00,
+    price: 300,
+    originalPrice: 380,
     rating: 4.9,
     reviewCount: 154,
     badge: 'FLAGSHIP',
@@ -433,9 +428,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 6,
     images: [
-      'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=85'
+      '/images/apple-watch-collection.png'
     ],
     colors: [
       { name: 'Natural Titanium', hex: '#94a3b8', bg: 'bg-slate-400' },
@@ -476,8 +469,8 @@ export const PRODUCTS = [
     subtitle: 'Precision Butterfly Clasp for 44/45/49mm Cases',
     category: 'Apple Watch',
     categorySlug: 'apple-watch',
-    price: 69.99,
-    originalPrice: 89.99,
+    price: 90,
+    originalPrice: 120,
     rating: 4.8,
     reviewCount: 204,
     badge: 'POPULAR',
@@ -486,8 +479,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 31,
     images: [
-      'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=900&q=85'
+      '/images/apple-watch-collection.png'
     ],
     colors: [
       { name: 'Brushed Silver', hex: '#cbd5e1', bg: 'bg-slate-300' },
@@ -527,8 +519,8 @@ export const PRODUCTS = [
     subtitle: 'Foldable 15W MagSafe Phone, Watch & AirPods Charging Station',
     category: 'Accessories',
     categorySlug: 'accessories',
-    price: 59.99,
-    originalPrice: 79.99,
+    price: 150,
+    originalPrice: 190,
     rating: 4.9,
     reviewCount: 326,
     badge: 'BEST SELLER',
@@ -537,8 +529,8 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 45,
     images: [
-      'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=900&q=85'
+      '/images/power-adapter.jpg',
+      '/images/usbc-cable.jpg'
     ],
     colors: [
       { name: 'Matte Space Gray', hex: '#374151', bg: 'bg-gray-700' },
@@ -578,8 +570,8 @@ export const PRODUCTS = [
     subtitle: 'Ultra-Thin Magnetic Battery Pack with Smart LED Matrix',
     category: 'Accessories',
     categorySlug: 'accessories',
-    price: 49.99,
-    originalPrice: 65.00,
+    price: 130,
+    originalPrice: 160,
     rating: 4.8,
     reviewCount: 189,
     badge: 'NEW',
@@ -588,8 +580,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 38,
     images: [
-      'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=900&q=85'
+      '/images/power-adapter.jpg'
     ],
     colors: [
       { name: 'Graphite Armor', hex: '#1e293b', bg: 'bg-slate-800' },
@@ -629,8 +620,8 @@ export const PRODUCTS = [
     subtitle: 'Dual 360° Hinges with Cable Routing Channel',
     category: 'Accessories',
     categorySlug: 'accessories',
-    price: 32.50,
-    originalPrice: 39.99,
+    price: 80,
+    originalPrice: 100,
     rating: 4.8,
     reviewCount: 167,
     badge: 'POPULAR',
@@ -639,8 +630,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 50,
     images: [
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=85',
-      'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=900&q=85'
+      '/images/apple-watch-collection.png'
     ],
     colors: [
       { name: 'Space Gray', hex: '#374151', bg: 'bg-gray-700' },
@@ -741,7 +731,7 @@ export const CUSTOMER_REVIEWS = [
 export const FAQS = [
   {
     question: 'How fast is standard and express shipping?',
-    answer: 'All orders are processed and dispatched within 24 business hours from our fulfillment hub. Standard shipping takes 3-5 business days (Free over $50). Express shipping takes 1-2 business days.'
+    answer: 'All orders are processed and dispatched within 24 business hours from our fulfillment hub. Standard shipping takes 2-4 business days (Free over 300 DH). Express shipping takes 1-2 business days.'
   },
   {
     question: 'Are all cables and adapters safe for Apple devices?',

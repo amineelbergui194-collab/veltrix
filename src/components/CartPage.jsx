@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../data/products';
 import {
   ShoppingBag,
   Trash2,
@@ -90,7 +91,7 @@ export const CartPage = () => {
                 ) : (
                   <div>
                     <div className="flex items-center justify-between text-xs font-mono text-neutral-300 mb-2">
-                      <span>Add ${amountNeeded.toFixed(2)} more for Free Shipping</span>
+                      <span>Add {formatPrice(amountNeeded)} more for Free Shipping</span>
                       <span>{Math.round(freeShippingPct)}%</span>
                     </div>
                     <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
@@ -114,13 +115,13 @@ export const CartPage = () => {
                       {/* Product image & name */}
                       <div className="flex items-center gap-4 min-w-0">
                         <div
-                          className="w-20 h-20 rounded-xl bg-neutral-950 border border-neutral-800 overflow-hidden shrink-0 cursor-pointer"
+                          className="w-20 h-20 rounded-xl bg-neutral-950 border border-neutral-800 overflow-hidden shrink-0 cursor-pointer p-1.5 flex items-center justify-center"
                           onClick={() => navigateTo('product-detail', item.product)}
                         >
                           <img
                             src={item.product.images[0]}
                             alt={item.product.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         </div>
                         <div>
@@ -134,7 +135,7 @@ export const CartPage = () => {
                             Finish: {item.selectedColor.name}
                           </p>
                           <span className="text-xs font-mono text-neutral-300 sm:hidden block mt-1">
-                            ${item.product.price.toFixed(2)} each
+                            {formatPrice(item.product.price)} each
                           </span>
                         </div>
                       </div>
@@ -173,7 +174,7 @@ export const CartPage = () => {
 
                         <div className="text-right min-w-[80px]">
                           <div className="font-mono font-bold text-base text-white">
-                            ${(item.product.price * item.quantity).toFixed(2)}
+                            {formatPrice(item.product.price * item.quantity)}
                           </div>
                         </div>
 
@@ -240,23 +241,23 @@ export const CartPage = () => {
                 <div className="space-y-3 text-xs sm:text-sm font-mono border-t border-neutral-800 pt-4 text-neutral-300">
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Subtotal</span>
-                    <span className="text-white">${subtotal.toFixed(2)}</span>
+                    <span className="text-white">{formatPrice(subtotal)}</span>
                   </div>
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-cyan-400">
                       <span>Promo Discount</span>
-                      <span>-${discountAmount.toFixed(2)}</span>
+                      <span>-{formatPrice(discountAmount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Estimated Shipping</span>
                     <span className="text-white">
-                      {standardShippingCost === 0 ? 'FREE' : `$${standardShippingCost.toFixed(2)}`}
+                      {standardShippingCost === 0 ? 'FREE' : formatPrice(standardShippingCost)}
                     </span>
                   </div>
                   <div className="flex justify-between pt-3 border-t border-neutral-800 text-base font-bold text-white">
                     <span>Total</span>
-                    <span className="text-cyan-300 text-xl">${finalTotal.toFixed(2)}</span>
+                    <span className="text-cyan-300 text-xl">{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
 

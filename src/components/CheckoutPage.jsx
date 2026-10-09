@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../data/products';
 import {
   Lock,
   ShieldCheck,
@@ -28,15 +29,15 @@ export const CheckoutPage = () => {
   // Form Fields
   const [formData, setFormData] = useState({
     email: 'tech.enthusiast@veltrix.com',
-    phone: '+1 (555) 234-5678',
-    firstName: 'Alex',
-    lastName: 'Vance',
-    address: '742 Evergreen Terrace',
-    apartment: 'Suite 4B',
-    city: 'San Francisco',
-    state: 'CA',
-    zip: '94107',
-    country: 'United States',
+    phone: '+212 6 00 00 00 00',
+    firstName: 'Karim',
+    lastName: 'El Amrani',
+    address: '15 Boulevard d\'Anfa',
+    apartment: 'Appt 12',
+    city: 'Casablanca',
+    state: 'Grand Casablanca',
+    zip: '20000',
+    country: 'Morocco',
   });
 
   const [shippingMethod, setShippingMethod] = useState('standard'); // 'standard', 'express', 'overnight'
@@ -45,7 +46,7 @@ export const CheckoutPage = () => {
   // Card details
   const [cardDetails, setCardDetails] = useState({
     number: '4242 •••• •••• 4242',
-    name: 'Alex Vance',
+    name: 'Karim El Amrani',
     expiry: '12/28',
     cvc: '883',
   });
@@ -55,11 +56,11 @@ export const CheckoutPage = () => {
   const [orderComplete, setOrderComplete] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState('');
 
-  // Shipping cost options
+  // Shipping cost options in DH
   const shippingCosts = {
-    standard: subtotal >= 50 || appliedPromo?.freeShipping ? 0 : 7.99,
-    express: 9.99,
-    overnight: 19.99,
+    standard: subtotal >= 300 || appliedPromo?.freeShipping ? 0 : 25,
+    express: 35,
+    overnight: 60,
   };
 
   const activeShippingCost = shippingCosts[shippingMethod];
@@ -124,7 +125,7 @@ export const CheckoutPage = () => {
             </div>
             <div className="flex justify-between text-base font-bold pt-1">
               <span className="text-white">Total Paid</span>
-              <span className="text-cyan-300">${finalCheckoutTotal.toFixed(2)}</span>
+              <span className="text-cyan-300">{formatPrice(finalCheckoutTotal)}</span>
             </div>
           </div>
 
@@ -345,19 +346,19 @@ export const CheckoutPage = () => {
                     id: 'standard',
                     name: 'Standard Insured Delivery',
                     time: '3–5 business days',
-                    price: shippingCosts.standard === 0 ? 'FREE' : `$${shippingCosts.standard.toFixed(2)}`,
+                    price: shippingCosts.standard === 0 ? 'FREE' : formatPrice(shippingCosts.standard),
                   },
                   {
                     id: 'express',
                     name: 'Express Priority Air',
                     time: '1–2 business days',
-                    price: `$${shippingCosts.express.toFixed(2)}`,
+                    price: formatPrice(shippingCosts.express),
                   },
                   {
                     id: 'overnight',
                     name: 'Next-Day Rush Priority',
                     time: 'Tomorrow by 10:30 AM',
-                    price: `$${shippingCosts.overnight.toFixed(2)}`,
+                    price: formatPrice(shippingCosts.overnight),
                   },
                 ].map((del) => (
                   <label
@@ -469,8 +470,8 @@ export const CheckoutPage = () => {
                 {cart.map((item, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-lg bg-neutral-950 border border-neutral-800 overflow-hidden shrink-0">
-                        <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
+                      <div className="w-12 h-12 rounded-lg bg-neutral-950 border border-neutral-800 overflow-hidden shrink-0 p-1 flex items-center justify-center">
+                        <img src={item.product.images[0]} alt="" className="w-full h-full object-contain" />
                       </div>
                       <div className="min-w-0">
                         <div className="font-bold text-white truncate">{item.product.name}</div>
@@ -480,7 +481,7 @@ export const CheckoutPage = () => {
                       </div>
                     </div>
                     <span className="font-mono font-bold text-white shrink-0">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.product.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -490,21 +491,21 @@ export const CheckoutPage = () => {
               <div className="space-y-2 border-t border-neutral-800 pt-4 text-xs font-mono text-neutral-300">
                 <div className="flex justify-between">
                   <span className="text-neutral-400">Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-cyan-400">
                     <span>Discount</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span>-{formatPrice(discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span className="text-neutral-400">Shipping</span>
-                  <span>{activeShippingCost === 0 ? 'FREE' : `$${activeShippingCost.toFixed(2)}`}</span>
+                  <span>{activeShippingCost === 0 ? 'FREE' : formatPrice(activeShippingCost)}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold text-white pt-2 border-t border-neutral-800">
                   <span>Grand Total</span>
-                  <span className="text-cyan-300">${finalCheckoutTotal.toFixed(2)}</span>
+                  <span className="text-cyan-300">{formatPrice(finalCheckoutTotal)}</span>
                 </div>
               </div>
 
@@ -522,7 +523,7 @@ export const CheckoutPage = () => {
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Complete Order — ${finalCheckoutTotal.toFixed(2)}</span>
+                    <span>Complete Order — {formatPrice(finalCheckoutTotal)}</span>
                   </>
                 )}
               </button>

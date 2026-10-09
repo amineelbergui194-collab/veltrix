@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../data/products';
 import { Star, Heart, Eye, ShoppingBag, Check } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
@@ -85,7 +86,7 @@ export const ProductCard = ({ product }) => {
         <img
           src={isHovered && product.images[1] ? product.images[1] : product.images[0]}
           alt={product.name}
-          className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-contain p-2 rounded-xl transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
 
@@ -134,11 +135,11 @@ export const ProductCard = ({ product }) => {
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-bold font-mono text-white">
-                ${product.price.toFixed(2)}
+                {formatPrice(product.price)}
               </span>
               {product.originalPrice && (
                 <span className="text-xs font-mono text-neutral-500 line-through">
-                  ${product.originalPrice.toFixed(2)}
+                  {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>

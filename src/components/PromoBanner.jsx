@@ -10,7 +10,7 @@ export const PromoBanner = () => {
       {/* Background with Dark Atmospheric Image & Gradients */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=2000&q=80"
+          src="/images/jbl-headphones.jpg"
           alt="Veltrix Sound and Precision Hardware"
           className="w-full h-full object-cover object-center opacity-25 filter grayscale contrast-125 scale-105"
         />

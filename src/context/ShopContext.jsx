@@ -189,12 +189,12 @@ export const ShopProvider = ({ children }) => {
     discountAmount = (subtotal * appliedPromo.discountPercent) / 100;
   }
 
-  // Free shipping threshold: $50 or if promo FREESHIP applies
-  const shippingThreshold = 50.00;
+  // Free shipping threshold: 300 DH or if promo FREESHIP applies
+  const shippingThreshold = 300.00;
   const isFreeShipping = subtotal >= shippingThreshold || appliedPromo?.freeShipping;
-  const standardShippingCost = cart.length === 0 ? 0 : (isFreeShipping ? 0 : 7.99);
+  const standardShippingCost = cart.length === 0 ? 0 : (isFreeShipping ? 0 : 25.00);
   
-  const estimatedTax = (subtotal - discountAmount) * 0.08; // 8% sales tax estimate
+  const estimatedTax = 0; // Moroccan pricing is all-inclusive (TTC)
   const finalTotal = Math.max(0, subtotal - discountAmount + standardShippingCost + (cart.length > 0 ? estimatedTax : 0));
 
   // Navigation helpers
