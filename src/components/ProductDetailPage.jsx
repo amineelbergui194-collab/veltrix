@@ -12,10 +12,7 @@ import {
   ShieldCheck,
   Check,
   ChevronRight,
-  Share2,
-  Clock,
-  Sparkles,
-  Info
+  Share2
 } from 'lucide-react';
 
 export const ProductDetailPage = () => {
@@ -92,7 +89,7 @@ export const ProductDetailPage = () => {
     : null;
 
   return (
-    <div className="py-10 bg-neutral-950 text-white min-h-screen">
+    <div className="py-10 bg-[#0C0C0C] text-[#D7E2EA] font-kanit min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-mono text-neutral-400 mb-8">

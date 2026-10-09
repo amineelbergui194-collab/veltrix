@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS, CATEGORIES } from '../data/products';
+import { PRODUCTS } from '../data/products';
 import { ProductCard } from './ProductCard';
 import {
   Search,
   SlidersHorizontal,
   X,
-  ChevronDown,
   RotateCcw,
-  Sparkles,
-  Grid3X3,
-  LayoutGrid
+  Sparkles
 } from 'lucide-react';
 
 export const ShopPage = () => {
@@ -101,7 +98,7 @@ export const ShopPage = () => {
     (minRating !== 'all' ? 1 : 0);
 
   return (
-    <div className="py-10 bg-neutral-950 min-h-screen text-white">
+    <div className="py-10 bg-[#0C0C0C] min-h-screen text-[#D7E2EA] font-kanit">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb & Title */}
         <div className="mb-8">

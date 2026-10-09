@@ -4,10 +4,65 @@ import { PRODUCTS } from '../data/products';
 const ShopContext = createContext();
 
 export const ShopProvider = ({ children }) => {
-  // Navigation / View State: 'home', 'shop', 'product-detail', 'cart', 'checkout'
-  const [currentView, setCurrentView] = useState('home');
-  const [selectedProduct, setSelectedProduct] = useState(PRODUCTS[0]);
+  // Helper to determine initial view from browser URL
+  const getInitialView = () => {
+    try {
+      const path = window.location.pathname.toLowerCase();
+      if (path === '/login') return 'login';
+      if (path === '/signup') return 'signup';
+      if (path === '/forgot-password') return 'forgot-password';
+      if (path === '/reset-password') return 'reset-password';
+      if (path === '/account') return 'account';
+      if (path === '/shop') return 'shop';
+      if (path === '/cart') return 'cart';
+      if (path === '/checkout') return 'checkout';
+      if (path.startsWith('/product/')) return 'product-detail';
+    } catch {
+      // Fallback
+    }
+    return 'home';
+  };
+
+  // Navigation / View State: 'home', 'shop', 'product-detail', 'cart', 'checkout', 'login', 'signup', 'forgot-password', 'reset-password', 'account'
+  const [currentView, setCurrentView] = useState(getInitialView);
+  const [selectedProduct, setSelectedProduct] = useState(() => {
+    try {
+      const path = window.location.pathname;
+      if (path.startsWith('/product/')) {
+        const id = path.split('/product/')[1]?.replace(/\/$/, '');
+        const found = PRODUCTS.find((p) => p.id === id);
+        if (found) return found;
+      }
+    } catch {}
+    return PRODUCTS[0];
+  });
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('all');
+
+  // Listen to browser forward/backward popstate
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase();
+      if (path === '/login') setCurrentView('login');
+      else if (path === '/signup') setCurrentView('signup');
+      else if (path === '/forgot-password') setCurrentView('forgot-password');
+      else if (path === '/reset-password') setCurrentView('reset-password');
+      else if (path === '/account') setCurrentView('account');
+      else if (path === '/shop') setCurrentView('shop');
+      else if (path === '/cart') setCurrentView('cart');
+      else if (path === '/checkout') setCurrentView('checkout');
+      else if (path.startsWith('/product/')) {
+        const id = path.split('/product/')[1]?.replace(/\/$/, '');
+        const found = PRODUCTS.find((p) => p.id === id);
+        if (found) setSelectedProduct(found);
+        setCurrentView('product-detail');
+      } else {
+        setCurrentView('home');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Modals & Drawers
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -197,11 +252,33 @@ export const ShopProvider = ({ children }) => {
   const estimatedTax = 0; // Moroccan pricing is all-inclusive (TTC)
   const finalTotal = Math.max(0, subtotal - discountAmount + standardShippingCost + (cart.length > 0 ? estimatedTax : 0));
 
-  // Navigation helpers
+  // Navigation helpers with URL sync
   const navigateTo = (view, product = null, category = null) => {
     if (product) setSelectedProduct(product);
     if (category) setActiveCategoryFilter(category);
     setCurrentView(view);
+
+    try {
+      let targetPath = '/';
+      if (view === 'shop') targetPath = '/shop';
+      else if (view === 'cart') targetPath = '/cart';
+      else if (view === 'checkout') targetPath = '/checkout';
+      else if (view === 'login') targetPath = '/login';
+      else if (view === 'signup') targetPath = '/signup';
+      else if (view === 'forgot-password') targetPath = '/forgot-password';
+      else if (view === 'reset-password') targetPath = '/reset-password';
+      else if (view === 'account') targetPath = '/account';
+      else if (view === 'product-detail' && (product || selectedProduct)) {
+        targetPath = `/product/${(product || selectedProduct).id}`;
+      }
+
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ view }, '', targetPath);
+      }
+    } catch {
+      // Fallback
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

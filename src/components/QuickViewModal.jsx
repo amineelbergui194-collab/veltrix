@@ -5,26 +5,13 @@ import {
   X,
   Star,
   ShoppingBag,
-  Zap,
   Heart,
-  ChevronRight,
-  ShieldCheck,
-  Check
+  ChevronRight
 } from 'lucide-react';
 
-export const QuickViewModal = () => {
-  const {
-    quickViewProduct,
-    setQuickViewProduct,
-    addToCart,
-    toggleWishlist,
-    isWishlisted,
-    navigateTo
-  } = useShop();
+const QuickViewDialog = ({ product, onClose }) => {
+  const { addToCart, toggleWishlist, isWishlisted, navigateTo } = useShop();
 
-  if (!quickViewProduct) return null;
-
-  const product = quickViewProduct;
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [qty, setQty] = useState(1);
@@ -33,11 +20,11 @@ export const QuickViewModal = () => {
 
   const handleAddToCart = () => {
     addToCart(product, qty, selectedColor);
-    setQuickViewProduct(null);
+    onClose();
   };
 
   const handleFullDetail = () => {
-    setQuickViewProduct(null);
+    onClose();
     navigateTo('product-detail', product);
   };
 
@@ -46,66 +33,76 @@ export const QuickViewModal = () => {
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
-        onClick={() => setQuickViewProduct(null)}
+        onClick={onClose}
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-3xl bg-neutral-950 border border-neutral-800 rounded-2xl text-white shadow-2xl z-10 overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-3xl bg-[#0C0C0C] border border-white/10 rounded-3xl text-white shadow-2xl z-10 overflow-hidden font-kanit">
         {/* Close Button */}
         <button
-          onClick={() => setQuickViewProduct(null)}
-          className="absolute top-4 right-4 z-20 p-2 text-neutral-400 hover:text-white rounded-xl bg-neutral-900/80 hover:bg-neutral-800 transition-colors cursor-pointer"
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 p-2 text-neutral-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {/* Left: Product Images */}
-          <div className="p-6 bg-neutral-900/30 flex flex-col justify-between border-b md:border-b-0 md:border-r border-neutral-850">
-            <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-950/80 border border-neutral-800/80 flex items-center justify-center p-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 max-h-[85vh] overflow-y-auto">
+          {/* Left: Images */}
+          <div className="p-6 bg-[#141416]/50 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/5">
+            <div className="relative aspect-square w-full rounded-2xl bg-[#0C0C0C] border border-white/5 flex items-center justify-center p-6 mb-4">
               <img
                 src={product.images[selectedImage] || product.images[0]}
                 alt={product.name}
-                className="w-full h-full object-contain p-2 rounded-lg"
+                className="max-h-full max-w-full object-contain drop-shadow-xl"
               />
             </div>
 
-            {/* Thumbnail selector */}
-            <div className="flex gap-2 justify-center">
-              {product.images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedImage(i)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden border cursor-pointer p-0.5 ${
-                    selectedImage === i ? 'border-cyan-400 ring-1 ring-cyan-400' : 'border-neutral-800 opacity-60'
-                  }`}
-                >
-                  <img src={img} alt="" className="w-full h-full object-contain" />
-                </button>
-              ))}
-            </div>
+            {product.images.length > 1 && (
+              <div className="flex gap-2 justify-center">
+                {product.images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    className={`w-14 h-14 rounded-xl border p-1 bg-[#0C0C0C] transition-all ${
+                      selectedImage === idx
+                        ? 'border-[#FF66EA] ring-1 ring-[#FF66EA]'
+                        : 'border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-contain" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Right: Info and Config */}
-          <div className="p-6 flex flex-col justify-between">
+          {/* Right: Info & Actions */}
+          <div className="p-6 sm:p-8 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-xs font-mono text-cyan-400 mb-1">
-                <span>{product.category}</span>
-                <span className="text-emerald-400 font-semibold">In Stock</span>
+              <div className="flex items-center justify-between text-xs mb-2">
+                <span className="font-mono text-[10px] text-[#BBCCD7] uppercase tracking-widest font-bold">
+                  {product.category}
+                </span>
+                <div className="flex items-center gap-1 text-amber-400">
+                  <Star className="w-3.5 h-3.5 fill-amber-400" />
+                  <span className="font-mono text-xs font-bold text-white">
+                    {product.rating}
+                  </span>
+                  <span className="text-neutral-500 text-[10px]">
+                    ({product.reviewCount})
+                  </span>
+                </div>
               </div>
 
-              <h2 className="text-xl font-bold text-white mb-1">{product.name}</h2>
-              <p className="text-xs text-neutral-400 line-clamp-2 mb-3">{product.subtitle}</p>
-
-              {/* Star rating */}
-              <div className="flex items-center gap-1.5 text-xs text-amber-400 mb-4">
-                <Star className="w-4 h-4 fill-amber-400" />
-                <span className="font-mono font-bold text-white">{product.rating}</span>
-                <span className="text-neutral-500">({product.reviewCount} reviews)</span>
-              </div>
+              <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white mb-1">
+                {product.name}
+              </h2>
+              <p className="text-xs text-neutral-400 font-light mb-4">
+                {product.subtitle}
+              </p>
 
               {/* Price */}
-              <div className="flex items-baseline gap-2 mb-4 pb-4 border-b border-neutral-850">
+              <div className="flex items-baseline gap-3 mb-6 pb-4 border-b border-white/5">
                 <span className="text-2xl font-bold font-mono text-white">
                   {formatPrice(product.price)}
                 </span>
@@ -116,43 +113,48 @@ export const QuickViewModal = () => {
                 )}
               </div>
 
-              {/* Color Finish */}
-              <div className="mb-4">
-                <span className="block text-[11px] font-mono text-neutral-400 mb-2">
-                  Finish: <strong className="text-white">{selectedColor.name}</strong>
-                </span>
-                <div className="flex gap-2">
-                  {product.colors.map((c) => (
-                    <button
-                      key={c.name}
-                      onClick={() => setSelectedColor(c)}
-                      className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 cursor-pointer ${
-                        selectedColor.name === c.name
-                          ? 'border-cyan-400 bg-neutral-900 text-white'
-                          : 'border-neutral-800 bg-neutral-950 text-neutral-400'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: c.hex }} />
-                      <span>{c.name}</span>
-                    </button>
-                  ))}
+              {/* Color selection */}
+              {product.colors && product.colors.length > 0 && (
+                <div className="mb-6">
+                  <div className="text-xs uppercase font-semibold tracking-wider text-neutral-300 mb-2">
+                    Finish: <span className="text-white font-normal">{selectedColor.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {product.colors.map((color) => (
+                      <button
+                        key={color.name}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer ${
+                          selectedColor.name === color.name
+                            ? 'border-white scale-110 shadow-md'
+                            : 'border-transparent hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Quantity */}
-              <div className="mb-6">
-                <span className="block text-[11px] font-mono text-neutral-400 mb-2">Quantity</span>
-                <div className="inline-flex items-center rounded-lg bg-neutral-900 border border-neutral-800 p-1">
+              {/* Quantity selector */}
+              <div className="mb-6 flex items-center gap-4">
+                <span className="text-xs uppercase font-semibold tracking-wider text-neutral-300">
+                  Quantity
+                </span>
+                <div className="flex items-center border border-white/10 rounded-full bg-white/5">
                   <button
                     onClick={() => setQty(Math.max(1, qty - 1))}
-                    className="w-7 h-7 text-neutral-400 hover:text-white flex items-center justify-center font-bold text-xs cursor-pointer"
+                    className="px-3 py-1 text-sm text-neutral-400 hover:text-white"
                   >
                     -
                   </button>
-                  <span className="w-8 text-center font-mono text-xs font-bold">{qty}</span>
+                  <span className="px-3 text-xs font-mono font-bold text-white">
+                    {qty}
+                  </span>
                   <button
                     onClick={() => setQty(qty + 1)}
-                    className="w-7 h-7 text-neutral-400 hover:text-white flex items-center justify-center font-bold text-xs cursor-pointer"
+                    className="px-3 py-1 text-sm text-neutral-400 hover:text-white"
                   >
                     +
                   </button>
@@ -161,10 +163,10 @@ export const QuickViewModal = () => {
             </div>
 
             {/* Actions */}
-            <div className="space-y-2 pt-4 border-t border-neutral-850">
+            <div className="space-y-3 pt-4 border-t border-white/5">
               <button
                 onClick={handleAddToCart}
-                className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-neutral-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/10"
+                className="w-full py-3.5 rounded-full btn-accent-gradient text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#B600A8]/20"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Add to Cart — {formatPrice(product.price * qty)}</span>
@@ -173,10 +175,10 @@ export const QuickViewModal = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => toggleWishlist(product.id)}
-                  className={`flex-1 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`flex-1 py-2.5 rounded-full border text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer ${
                     wishlisted
                       ? 'border-rose-500/40 bg-rose-500/10 text-rose-400'
-                      : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:text-white'
+                      : 'border-white/10 bg-white/5 text-neutral-300 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   <Heart className={`w-3.5 h-3.5 ${wishlisted ? 'fill-rose-500' : ''}`} />
@@ -185,7 +187,7 @@ export const QuickViewModal = () => {
 
                 <button
                   onClick={handleFullDetail}
-                  className="flex-1 py-2.5 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-neutral-200 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <span>Full Details</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -196,5 +198,18 @@ export const QuickViewModal = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+export const QuickViewModal = () => {
+  const { quickViewProduct, setQuickViewProduct } = useShop();
+
+  if (!quickViewProduct) return null;
+
+  return (
+    <QuickViewDialog
+      product={quickViewProduct}
+      onClose={() => setQuickViewProduct(null)}
+    />
   );
 };

@@ -9,7 +9,6 @@ import {
   Zap,
   Tag,
   ArrowLeft,
-  Truck,
   RotateCcw
 } from 'lucide-react';
 
@@ -44,7 +43,7 @@ export const CartPage = () => {
   const freeShippingPct = Math.min(100, (subtotal / shippingThreshold) * 100);
 
   return (
-    <div className="py-12 bg-neutral-950 text-white min-h-screen">
+    <div className="py-12 bg-[#0C0C0C] text-[#D7E2EA] font-kanit min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">

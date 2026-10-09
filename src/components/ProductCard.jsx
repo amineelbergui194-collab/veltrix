@@ -43,27 +43,27 @@ export const ProductCard = ({ product }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => navigateTo('product-detail', product)}
-      className="group relative rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/90 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer hover:shadow-xl hover:shadow-black/60"
+      className="group relative rounded-3xl bg-[#141416]/90 border border-white/10 hover:border-white/30 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-[#B600A8]/20 font-kanit"
     >
       {/* CARD TOP / IMAGE CONTAINER */}
-      <div className="relative aspect-square w-full overflow-hidden bg-neutral-950/80 flex items-center justify-center p-4">
+      <div className="relative aspect-square w-full overflow-hidden bg-[#0C0C0C]/80 border-b border-white/5 flex items-center justify-center p-6">
         {/* Badges */}
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+        <div className="absolute top-3.5 left-3.5 z-10 flex flex-col gap-1.5 items-start">
           {product.badge && (
             <span
-              className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase border shadow-sm ${
+              className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest uppercase border shadow-sm ${
                 product.badge === 'BEST SELLER' || product.badge === 'FLAGSHIP'
-                  ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+                  ? 'bg-white/10 text-white border-white/20'
                   : product.badge === 'NEW'
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : 'bg-neutral-800/90 text-neutral-300 border-neutral-700'
+                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                  : 'bg-white/5 text-neutral-300 border-white/10'
               }`}
             >
               {product.badge}
             </span>
           )}
           {discountPercent && (
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#B600A8]/20 text-[#FF66EA] border border-[#B600A8]/30">
               Save {discountPercent}%
             </span>
           )}
@@ -73,27 +73,27 @@ export const ProductCard = ({ product }) => {
         <button
           onClick={handleWishlist}
           aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-          className={`absolute top-3 right-3 z-10 p-2 rounded-xl backdrop-blur-md transition-all duration-200 cursor-pointer ${
+          className={`absolute top-3.5 right-3.5 z-10 p-2 rounded-full backdrop-blur-md transition-all duration-200 cursor-pointer ${
             wishlisted
               ? 'bg-rose-500/20 text-rose-500 border border-rose-500/40'
-              : 'bg-neutral-900/70 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-700/50'
+              : 'bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 border border-white/10'
           }`}
         >
-          <Heart className={`w-4 h-4 ${wishlisted ? 'fill-rose-500' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 ${wishlisted ? 'fill-rose-500' : ''}`} />
         </button>
 
-        {/* Product Image (with hover second angle if available) */}
+        {/* Product Image */}
         <img
           src={isHovered && product.images[1] ? product.images[1] : product.images[0]}
           alt={product.name}
-          className="w-full h-full object-contain p-2 rounded-xl transition-transform duration-500 group-hover:scale-105"
+          className="max-h-[85%] max-w-[85%] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-108"
           loading="lazy"
         />
 
-        {/* Quick View Button (Shows on hover) */}
+        {/* Quick View Button */}
         <button
           onClick={handleQuickView}
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-neutral-900/90 hover:bg-white text-neutral-200 hover:text-neutral-950 text-xs font-semibold backdrop-blur-md border border-neutral-700/80 shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1.5 cursor-pointer z-10"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#0C0C0C]/90 hover:bg-white text-neutral-200 hover:text-[#0C0C0C] text-xs font-semibold backdrop-blur-md border border-white/20 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1.5 cursor-pointer z-10 uppercase tracking-wider whitespace-nowrap"
         >
           <Eye className="w-3.5 h-3.5" />
           <span>Quick View</span>
@@ -105,33 +105,33 @@ export const ProductCard = ({ product }) => {
         <div>
           {/* Category & Rating */}
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="font-mono text-[11px] text-neutral-400 uppercase tracking-wider">
+            <span className="font-mono text-[10px] text-[#BBCCD7] uppercase tracking-widest font-semibold">
               {product.category}
             </span>
             <div className="flex items-center gap-1 text-amber-400">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span className="font-mono text-neutral-200 text-xs font-bold">
+              <Star className="w-3 h-3 fill-amber-400" />
+              <span className="font-mono text-white text-xs font-bold">
                 {product.rating}
               </span>
-              <span className="text-neutral-500 text-[11px]">
+              <span className="text-neutral-500 text-[10px]">
                 ({product.reviewCount})
               </span>
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="text-base font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-1">
+          <h3 className="text-base font-bold text-white group-hover:text-[#FF66EA] transition-colors line-clamp-1 uppercase tracking-tight">
             {product.name}
           </h3>
 
           {/* Short Description */}
-          <p className="text-xs text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-neutral-400 font-light mt-1 line-clamp-2 leading-relaxed">
             {product.subtitle}
           </p>
         </div>
 
         {/* Price & Add to Cart Footer */}
-        <div className="mt-5 pt-4 border-t border-neutral-850 flex items-center justify-between">
+        <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-bold font-mono text-white">
@@ -149,21 +149,21 @@ export const ProductCard = ({ product }) => {
           <button
             onClick={handleAdd}
             aria-label="Add to cart"
-            className={`p-2.5 rounded-xl text-xs font-bold transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
+            className={`p-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
               addedAnimation
-                ? 'bg-emerald-500 text-neutral-950'
-                : 'bg-neutral-800 hover:bg-cyan-500 text-neutral-200 hover:text-neutral-950 border border-neutral-700/80 hover:border-cyan-400 shadow-sm'
+                ? 'bg-emerald-500 text-[#0C0C0C]'
+                : 'bg-white/5 hover:bg-white text-white hover:text-[#0C0C0C] border border-white/10 hover:border-white'
             }`}
           >
             {addedAnimation ? (
               <>
                 <Check className="w-4 h-4" />
-                <span className="hidden sm:inline">Added</span>
+                <span className="text-[11px] px-1">Added</span>
               </>
             ) : (
               <>
                 <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">Add</span>
+                <span className="text-[11px] px-1 hidden sm:inline">Add</span>
               </>
             )}
           </button>

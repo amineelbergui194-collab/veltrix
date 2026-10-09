@@ -7,9 +7,7 @@ import {
   Trash2,
   ArrowRight,
   Zap,
-  Tag,
-  ShieldCheck,
-  Check
+  Tag
 } from 'lucide-react';
 
 export const CartDrawer = () => {

@@ -6,12 +6,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   CreditCard,
-  Truck,
-  ArrowLeft,
-  ArrowRight,
-  Sparkles,
-  ShoppingBag,
-  ExternalLink
+  ArrowLeft
 } from 'lucide-react';
 
 export const CheckoutPage = () => {
@@ -20,7 +15,6 @@ export const CheckoutPage = () => {
     subtotal,
     discountAmount,
     appliedPromo,
-    standardShippingCost,
     clearCart,
     navigateTo,
     addToast
@@ -150,7 +144,7 @@ export const CheckoutPage = () => {
 
   // CHECKOUT FORM SCREEN
   return (
-    <div className="py-10 bg-neutral-950 text-white min-h-screen">
+    <div className="py-10 bg-[#0C0C0C] text-[#D7E2EA] font-kanit min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation & Trust Header */}
         <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-900">

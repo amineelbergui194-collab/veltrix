@@ -1,13 +1,10 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
+import { useAuth } from '../context/AuthContext';
 import {
-  ShieldCheck,
-  CreditCard,
   Lock,
-  ArrowUp,
-  ExternalLink
+  ArrowUp
 } from 'lucide-react';
-
 
 export const Footer = () => {
   const {
@@ -17,47 +14,48 @@ export const Footer = () => {
     setIsTrackingOpen,
     setIsAboutOpen
   } = useShop();
+  const { isAuthenticated } = useAuth();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="bg-neutral-950 text-neutral-400 pt-16 pb-12 border-t border-neutral-900">
+    <footer className="bg-[#0C0C0C] text-neutral-400 pt-20 pb-12 border-t border-white/5 font-kanit">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-16 border-b border-neutral-900">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-16 border-b border-white/10">
           {/* Brand Info Column */}
           <div className="lg:col-span-2 flex flex-col items-start pr-0 lg:pr-8">
             <button
               onClick={() => navigateTo('home')}
-              className="flex items-center gap-2.5 mb-4 group text-left cursor-pointer"
+              className="flex items-center gap-3 mb-4 group text-left cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-white flex items-center justify-center p-0.5 shadow-md">
-                <div className="w-full h-full bg-neutral-950 rounded-[10px] flex items-center justify-center">
-                  <span className="font-extrabold text-white font-mono text-lg">
+              <div className="w-10 h-10 rounded-2xl bg-accent-gradient flex items-center justify-center p-0.5 shadow-lg shadow-[#B600A8]/20">
+                <div className="w-full h-full bg-[#0C0C0C] rounded-[14px] flex items-center justify-center">
+                  <span className="font-extrabold text-white text-base">
                     V
                   </span>
                 </div>
               </div>
-              <span className="text-2xl font-black tracking-widest text-white group-hover:text-cyan-400 transition-colors">
+              <span className="text-2xl font-black tracking-widest text-white group-hover:text-[#FF66EA] transition-colors uppercase">
                 VELTRIX
               </span>
             </button>
 
-            <p className="text-sm font-semibold text-neutral-200 mb-2">
+            <p className="text-sm font-semibold text-neutral-200 mb-2 uppercase tracking-wide">
               VELTRIX — Upgrade Your Everyday.
             </p>
-            <p className="text-xs text-neutral-400 leading-relaxed mb-6 max-w-sm">
-              Engineered electronics and accessories designed for refined listening, seamless high-speed power delivery, and smart living.
+            <p className="text-xs text-neutral-400 font-light leading-relaxed mb-6 max-w-sm">
+              Engineered electronics, spatial acoustics, and GaN power accessories designed for refined listening and high-speed everyday capability.
             </p>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <a
                 href="#instagram"
                 onClick={(e) => e.preventDefault()}
-                className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
                 aria-label="Follow Veltrix on Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -67,21 +65,11 @@ export const Footer = () => {
               <a
                 href="#tiktok"
                 onClick={(e) => e.preventDefault()}
-                className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
                 aria-label="Follow Veltrix on TikTok"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c0 1.94-.52 3.86-1.55 5.51-1.52 2.44-4.04 4.07-6.91 4.39-2.85.31-5.74-.69-7.79-2.71-2.07-2.04-3.03-4.99-2.61-7.87.41-2.85 2.1-5.32 4.62-6.63 1.57-.82 3.37-1.14 5.14-.95v4.11c-1.15-.22-2.38-.05-3.41.5-1.04.56-1.78 1.55-2.04 2.71-.27 1.19-.01 2.45.69 3.44.71 1 1.83 1.62 3.06 1.68 1.23.05 2.45-.45 3.25-1.39.56-.66.86-1.52.85-2.4V.02h.65z"/>
-                </svg>
-              </a>
-              <a
-                href="#facebook"
-                onClick={(e) => e.preventDefault()}
-                className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
-                aria-label="Follow Veltrix on Facebook"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
             </div>
@@ -89,16 +77,16 @@ export const Footer = () => {
 
           {/* Column 1: Shop */}
           <div>
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-white mb-4">
-              Shop
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">
+              Catalog
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
+            <ul className="space-y-2.5 text-xs">
               <li>
                 <button
                   onClick={() => navigateTo('shop', null, 'airpods')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  AirPods
+                  AirPods In-Ear
                 </button>
               </li>
               <li>
@@ -106,7 +94,7 @@ export const Footer = () => {
                   onClick={() => navigateTo('shop', null, 'headphones')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Headphones
+                  Over-Ear Headphones
                 </button>
               </li>
               <li>
@@ -114,7 +102,7 @@ export const Footer = () => {
                   onClick={() => navigateTo('shop', null, 'apple-watch')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Apple Watch
+                  Apple Watch Wearables
                 </button>
               </li>
               <li>
@@ -122,15 +110,7 @@ export const Footer = () => {
                   onClick={() => navigateTo('shop', null, 'cables-adapters')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Cables
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo('shop', null, 'cables-adapters')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Adapters
+                  GaN Chargers & 100W Cables
                 </button>
               </li>
               <li>
@@ -138,48 +118,42 @@ export const Footer = () => {
                   onClick={() => navigateTo('shop', null, 'accessories')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Accessories
+                  MagSafe Essentials
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 2: Customer Care */}
+          {/* Column 2: Account & Membership */}
           <div>
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-white mb-4">
-              Customer Care
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">
+              Account & Auth
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
+            <ul className="space-y-2.5 text-xs">
               <li>
                 <button
-                  onClick={() => setIsContactOpen(true)}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  onClick={() => navigateTo(isAuthenticated ? 'account' : 'login')}
+                  className="hover:text-white transition-colors cursor-pointer text-[#BBCCD7]"
                 >
-                  Contact Us
+                  {isAuthenticated ? 'My Member Portal' : 'Sign In to Account'}
                 </button>
               </li>
+              {!isAuthenticated && (
+                <li>
+                  <button
+                    onClick={() => navigateTo('signup')}
+                    className="hover:text-white transition-colors cursor-pointer"
+                  >
+                    Create Account
+                  </button>
+                </li>
+              )}
               <li>
                 <button
-                  onClick={() => setIsFaqOpen(true)}
+                  onClick={() => navigateTo('forgot-password')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  FAQ
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setIsFaqOpen(true)}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Shipping
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setIsFaqOpen(true)}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Returns & Refunds
+                  Password Recovery
                 </button>
               </li>
               <li>
@@ -187,24 +161,32 @@ export const Footer = () => {
                   onClick={() => setIsTrackingOpen(true)}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Order Tracking
+                  Live Order Telemetry
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Company */}
+          {/* Column 3: Support & Guarantee */}
           <div>
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-white mb-4">
-              Company
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">
+              Support & Guarantee
             </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm">
+            <ul className="space-y-2.5 text-xs">
               <li>
                 <button
-                  onClick={() => setIsAboutOpen(true)}
+                  onClick={() => setIsContactOpen(true)}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  About Veltrix
+                  Engineering Support
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setIsFaqOpen(true)}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  Compatibility FAQ
                 </button>
               </li>
               <li>
@@ -212,7 +194,7 @@ export const Footer = () => {
                   onClick={() => setIsAboutOpen(true)}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Privacy Policy
+                  30-Day Risk-Free Trial
                 </button>
               </li>
               <li>
@@ -220,50 +202,47 @@ export const Footer = () => {
                   onClick={() => setIsAboutOpen(true)}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Terms of Service
+                  2-Year Hardware Warranty
                 </button>
               </li>
             </ul>
 
             {/* Security Badge */}
-            <div className="mt-8 p-3 rounded-xl bg-neutral-900/60 border border-neutral-800 text-[11px] font-mono flex items-center gap-2 text-neutral-400">
-              <Lock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>256-bit Encrypted SSL Security</span>
+            <div className="mt-6 p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-[11px] flex items-center gap-2 text-neutral-400">
+              <Lock className="w-3.5 h-3.5 text-[#FF66EA] shrink-0" />
+              <span>256-Bit SSL Encrypted</span>
             </div>
           </div>
         </div>
 
         {/* Footer Bottom Bar */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-500">
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-light text-neutral-400">
           <div>
-            © {new Date().getFullYear()} VELTRIX Technologies Inc. All rights reserved.
+            © 2026 VELTRIX TECH INC. All rights reserved.
           </div>
 
-          {/* Payment Badges Mock */}
-          <div className="flex items-center gap-3 text-neutral-400">
-            <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px]">
+          {/* Payment Badges */}
+          <div className="flex items-center gap-2 text-neutral-400 text-[10px] font-mono">
+            <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
               Apple Pay
             </span>
-            <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px]">
+            <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
               Visa
             </span>
-            <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px]">
+            <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
               MasterCard
             </span>
-            <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px]">
-              Amex
-            </span>
-            <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px]">
-              PayPal
+            <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
+              COD Available
             </span>
           </div>
 
           {/* Scroll to Top */}
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer uppercase text-[11px] font-semibold"
           >
-            <span>Back to top</span>
+            <span>Top</span>
             <ArrowUp className="w-3.5 h-3.5" />
           </button>
         </div>
