@@ -7,15 +7,21 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
+    "test": "node --test tests/security-payments.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^10.6.0",
+    "@stripe/react-stripe-js": "^7.0.0",
+    "@stripe/stripe-js": "^10.0.0",
     "@supabase/supabase-js": "^2.117.3",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.53.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "stripe": "^23.0.0",
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {

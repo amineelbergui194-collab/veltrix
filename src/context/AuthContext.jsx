@@ -9,25 +9,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
 
-  // Initialize Supabase Auth Session
+  // Initialize Supabase Auth Session and subscribe to changes
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
       try {
         if (!isSupabaseConfigured || !supabase) {
-          // If no supabase credentials provided, check localStorage for simulated session
-          const savedLocalUser = localStorage.getItem('veltrix_auth_user');
-          if (savedLocalUser) {
-            setUser(JSON.parse(savedLocalUser));
+          // No fake credentials or simulated accounts allowed per security specification
+          if (mounted) {
+            setUser(null);
+            setSession(null);
+            setLoading(false);
           }
-          setLoading(false);
           return;
         }
 
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         if (error) {
-          console.warn('Error fetching Supabase session:', error.message);
+          console.error('Error fetching Supabase session:', error.message);
         }
 
         if (mounted) {
@@ -36,21 +36,40 @@ export const AuthProvider = ({ children }) => {
           setLoading(false);
         }
       } catch (err) {
-        console.warn('Auth initialization exception:', err);
+        console.error('Auth initialization exception:', err);
         if (mounted) setLoading(false);
       }
     };
 
     initializeAuth();
 
-    // Listen to Supabase auth state changes
+    // Listen to Supabase auth state changes (OAuth redirects, token refresh, sign-in, sign-out)
     let subscription = null;
     if (isSupabaseConfigured && supabase) {
-      const { data } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-        if (mounted) {
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          setLoading(false);
+      const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+        if (!mounted) return;
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
+
+        // Sync user profile in Supabase database if logged in
+        if (event === 'SIGNED_IN' && currentSession?.user) {
+          try {
+            const authUser = currentSession.user;
+            await supabase.from('profiles').upsert({
+              id: authUser.id,
+              email: authUser.email,
+              full_name:
+                authUser.user_metadata?.full_name ||
+                authUser.user_metadata?.name ||
+                authUser.email?.split('@')[0] ||
+                'Veltrix Member',
+              avatar_url: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
+              updated_at: new Date().toISOString(),
+            });
+          } catch {
+            // Profile upsert fallback if table is not yet migrated
+          }
         }
       });
       subscription = data.subscription;
@@ -64,46 +83,100 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // Check whether backend auth is properly initialized
+  const checkConfigured = () => {
+    if (!isSupabaseConfigured || !supabase) {
+      const msg =
+        'Supabase non configuré : Veuillez renseigner VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans votre fichier .env pour activer les fonctionnalités réelles.';
+      setAuthError(msg);
+      return false;
+    }
+    return true;
+  };
+
+  // Google OAuth Sign-In (Official Google Identity standard)
+  const signInWithGoogle = async () => {
+    setAuthError(null);
+    if (!checkConfigured()) return { success: false, error: 'Configuration Supabase manquante' };
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/account`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
+      }
+      return { success: true, data };
+    } catch (err) {
+      const msg = err.message || 'Échec de la connexion avec Google.';
+      setAuthError(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  // Apple Sign-In (Official Apple ID standard)
+  const signInWithApple = async () => {
+    setAuthError(null);
+    if (!checkConfigured()) return { success: false, error: 'Configuration Supabase manquante' };
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/account`,
+          scopes: 'name email',
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
+      }
+      return { success: true, data };
+    } catch (err) {
+      const msg = err.message || "Échec de la connexion avec l'identifiant Apple.";
+      setAuthError(msg);
+      return { success: false, error: msg };
+    }
+  };
+
   // Sign In with Email & Password
   const signInWithEmail = async (email, password) => {
     setAuthError(null);
     setLoading(true);
 
+    if (!checkConfigured()) {
+      setLoading(false);
+      return { success: false, error: 'Configuration Supabase manquante' };
+    }
+
     try {
-      if (isSupabaseConfigured && supabase) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) {
-          setAuthError(error.message);
-          setLoading(false);
-          return { success: false, error: error.message };
-        }
-
-        setSession(data.session);
-        setUser(data.user);
+      if (error) {
+        setAuthError(error.message);
         setLoading(false);
-        return { success: true, user: data.user };
-      } else {
-        // Fallback simulated sign in for development/offline
-        const mockUser = {
-          id: 'user_' + Date.now(),
-          email,
-          user_metadata: {
-            full_name: email.split('@')[0].toUpperCase(),
-            tier: 'Obsidian Insider'
-          },
-          created_at: new Date().toISOString()
-        };
-        localStorage.setItem('veltrix_auth_user', JSON.stringify(mockUser));
-        setUser(mockUser);
-        setLoading(false);
-        return { success: true, user: mockUser };
+        return { success: false, error: error.message };
       }
+
+      setSession(data.session);
+      setUser(data.user);
+      setLoading(false);
+      return { success: true, user: data.user };
     } catch (err) {
-      const msg = err.message || 'Failed to sign in. Please try again.';
+      const msg = err.message || 'Impossible de se connecter. Veuillez réessayer.';
       setAuthError(msg);
       setLoading(false);
       return { success: false, error: msg };
@@ -115,52 +188,40 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null);
     setLoading(true);
 
+    if (!checkConfigured()) {
+      setLoading(false);
+      return { success: false, error: 'Configuration Supabase manquante' };
+    }
+
     try {
-      if (isSupabaseConfigured && supabase) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName || email.split('@')[0],
-              tier: 'Obsidian Insider'
-            },
-            emailRedirectTo: `${window.location.origin}/account`,
-          },
-        });
-
-        if (error) {
-          setAuthError(error.message);
-          setLoading(false);
-          return { success: false, error: error.message };
-        }
-
-        setSession(data.session);
-        setUser(data.user);
-        setLoading(false);
-        return {
-          success: true,
-          user: data.user,
-          requiresEmailConfirmation: !data.session && Boolean(data.user),
-        };
-      } else {
-        // Fallback simulated sign up
-        const mockUser = {
-          id: 'user_' + Date.now(),
-          email,
-          user_metadata: {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
             full_name: fullName || email.split('@')[0],
-            tier: 'Obsidian Insider'
+            tier: 'Obsidian Insider',
           },
-          created_at: new Date().toISOString()
-        };
-        localStorage.setItem('veltrix_auth_user', JSON.stringify(mockUser));
-        setUser(mockUser);
+          emailRedirectTo: `${window.location.origin}/account`,
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
         setLoading(false);
-        return { success: true, user: mockUser, requiresEmailConfirmation: false };
+        return { success: false, error: error.message };
       }
+
+      setSession(data.session);
+      setUser(data.user);
+      setLoading(false);
+      return {
+        success: true,
+        user: data.user,
+        requiresEmailConfirmation: !data.session && Boolean(data.user),
+      };
     } catch (err) {
-      const msg = err.message || 'Failed to register account. Please try again.';
+      const msg = err.message || 'Impossible de créer le compte. Veuillez réessayer.';
       setAuthError(msg);
       setLoading(false);
       return { success: false, error: msg };
@@ -174,11 +235,10 @@ export const AuthProvider = ({ children }) => {
       if (isSupabaseConfigured && supabase) {
         await supabase.auth.signOut();
       }
-      localStorage.removeItem('veltrix_auth_user');
       setUser(null);
       setSession(null);
     } catch (err) {
-      console.warn('Sign out error:', err);
+      console.error('Sign out error:', err);
     } finally {
       setLoading(false);
     }
@@ -187,22 +247,20 @@ export const AuthProvider = ({ children }) => {
   // Send Password Reset Link
   const sendPasswordReset = async (email) => {
     setAuthError(null);
-    try {
-      if (isSupabaseConfigured && supabase) {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
+    if (!checkConfigured()) return { success: false, error: 'Configuration Supabase manquante' };
 
-        if (error) {
-          setAuthError(error.message);
-          return { success: false, error: error.message };
-        }
-        return { success: true };
-      } else {
-        return { success: true, message: 'Password recovery email sent (simulated).' };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
       }
+      return { success: true };
     } catch (err) {
-      const msg = err.message || 'Error sending password reset email.';
+      const msg = err.message || "Erreur lors de l'envoi de l'e-mail de réinitialisation.";
       setAuthError(msg);
       return { success: false, error: msg };
     }
@@ -211,22 +269,20 @@ export const AuthProvider = ({ children }) => {
   // Update Password
   const updateUserPassword = async (newPassword) => {
     setAuthError(null);
-    try {
-      if (isSupabaseConfigured && supabase) {
-        const { data, error } = await supabase.auth.updateUser({
-          password: newPassword,
-        });
+    if (!checkConfigured()) return { success: false, error: 'Configuration Supabase manquante' };
 
-        if (error) {
-          setAuthError(error.message);
-          return { success: false, error: error.message };
-        }
-        return { success: true, user: data.user };
-      } else {
-        return { success: true };
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
       }
+      return { success: true, user: data.user };
     } catch (err) {
-      const msg = err.message || 'Failed to update password.';
+      const msg = err.message || 'Impossible de modifier le mot de passe.';
       setAuthError(msg);
       return { success: false, error: msg };
     }
@@ -241,6 +297,8 @@ export const AuthProvider = ({ children }) => {
         authError,
         setAuthError,
         isAuthenticated: Boolean(user),
+        signInWithGoogle,
+        signInWithApple,
         signInWithEmail,
         signUpWithEmail,
         signOutUser,

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useShop } from '../../context/ShopContext';
+import { supabase } from '../../supabase';
 import { ProtectedRoute } from '../ui/ProtectedRoute';
 import { SecondaryButton } from '../ui/SecondaryButton';
+import { formatPrice } from '../../data/products';
 import {
   User,
   Package,
@@ -10,45 +12,73 @@ import {
   LogOut,
   Sparkles,
   ArrowRight,
-  Truck
+  Truck,
+  ShoppingBag,
+  ExternalLink
 } from 'lucide-react';
 
 const AccountContent = () => {
-  const { user, signOutUser, loading } = useAuth();
+  const { user, signOutUser, loading: authLoading } = useAuth();
   const { navigateTo, wishlist, cart } = useShop();
   const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'profile', 'warranty'
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
-  const userEmail = user?.email || 'member@veltrix.tech';
+  const userEmail = user?.email || 'membre@veltrix.tech';
   const userName =
     user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
     userEmail.split('@')[0].toUpperCase();
   const userTier = user?.user_metadata?.tier || 'Obsidian VIP Insider';
 
-  const mockOrders = [
-    {
-      id: 'VELT-94281',
-      date: 'October 4, 2026',
-      status: 'In Transit',
-      statusColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-      total: '120.00 DH',
-      items: [
-        { name: 'AirPods Pro 2 (USB-C MagSafe)', qty: 1, color: 'White Gloss' }
-      ],
-      trackingNumber: 'MA-EXP-9021482'
-    },
-    {
-      id: 'VELT-81903',
-      date: 'September 18, 2026',
-      status: 'Delivered',
-      statusColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-      total: '190.00 DH',
-      items: [
-        { name: 'USB-C Fast Charging Cable 100W', qty: 2, color: 'Stealth Black' },
-        { name: 'MagSafe Wireless Charger 15W', qty: 1, color: 'Silver' }
-      ],
-      trackingNumber: 'MA-EXP-7729103'
+  // Identify connected auth provider
+  const getProviderInfo = () => {
+    const provider = user?.app_metadata?.provider || 'email';
+    if (provider === 'google') {
+      return { name: 'Google Workspace OAuth', badge: 'Compte Google vérifié' };
     }
-  ];
+    if (provider === 'apple') {
+      return { name: 'Apple ID Sign-in', badge: 'Identifiant Apple sécurisé' };
+    }
+    return { name: 'Authentification E-mail & Mot de passe', badge: 'Supabase Cloud Auth' };
+  };
+
+  const providerInfo = getProviderInfo();
+
+  // Load real orders from Supabase
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const fetchUserOrders = async () => {
+      if (!user?.id || !supabase) {
+        setOrdersLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.warn('Orders fetch error (table may not exist yet):', error.message);
+        } else if (isSubscribed && data) {
+          setOrders(data);
+        }
+      } catch (err) {
+        console.warn('Exception fetching orders:', err);
+      } finally {
+        if (isSubscribed) setOrdersLoading(false);
+      }
+    };
+
+    fetchUserOrders();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -64,10 +94,10 @@ const AccountContent = () => {
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-neutral-400 mb-6">
           <button onClick={() => navigateTo('home')} className="hover:text-white transition-colors cursor-pointer">
-            Home
+            Accueil
           </button>
           <span>/</span>
-          <span className="text-[#BBCCD7]">Account Portal</span>
+          <span className="text-[#BBCCD7]">Espace Personnel</span>
         </div>
 
         {/* PROFILE HEADER CARD */}
@@ -75,11 +105,19 @@ const AccountContent = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
               {/* User Avatar */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-accent-gradient flex items-center justify-center p-0.5 shadow-xl shadow-[#B600A8]/30 shrink-0">
-                <div className="w-full h-full bg-[#0C0C0C] rounded-[14px] flex items-center justify-center">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-white">
-                    {userName.charAt(0)}
-                  </span>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#B600A8] via-[#FF66EA] to-cyan-400 flex items-center justify-center p-0.5 shadow-xl shadow-[#B600A8]/30 shrink-0">
+                <div className="w-full h-full bg-[#0C0C0C] rounded-[14px] flex items-center justify-center overflow-hidden">
+                  {user?.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt={userName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl sm:text-3xl font-extrabold text-white">
+                      {userName.charAt(0)}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -93,7 +131,7 @@ const AccountContent = () => {
                   {userName}
                 </h1>
                 <p className="text-xs sm:text-sm text-neutral-400 font-light mt-0.5">
-                  {userEmail}
+                  {userEmail} • <span className="text-neutral-500">{providerInfo.badge}</span>
                 </p>
               </div>
             </div>
@@ -105,15 +143,15 @@ const AccountContent = () => {
                 size="sm"
                 icon={ArrowRight}
               >
-                Browse Catalog
+                Explorer le Catalogue
               </SecondaryButton>
               <button
                 onClick={handleSignOut}
-                disabled={loading}
+                disabled={authLoading}
                 className="px-5 py-2.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border border-rose-500/30 text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
+                <span>Déconnexion</span>
               </button>
             </div>
           </div>
@@ -121,20 +159,22 @@ const AccountContent = () => {
           {/* Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/5 text-xs">
             <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Active Orders</span>
-              <span className="text-xl font-bold text-white font-mono mt-1 block">1</span>
+              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Commandes Enregistrées</span>
+              <span className="text-xl font-bold text-white font-mono mt-1 block">
+                {ordersLoading ? '...' : orders.length}
+              </span>
             </div>
             <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Wishlisted Items</span>
+              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Articles en Favoris</span>
               <span className="text-xl font-bold text-white font-mono mt-1 block">{wishlist.length}</span>
             </div>
             <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Cart Reserve</span>
-              <span className="text-xl font-bold text-white font-mono mt-1 block">{cart.length} items</span>
+              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Panier Actuel</span>
+              <span className="text-xl font-bold text-white font-mono mt-1 block">{cart.length} articles</span>
             </div>
             <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Hardware Warranty</span>
-              <span className="text-xl font-bold text-emerald-400 font-mono mt-1 block">Active (2 Yrs)</span>
+              <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Garantie Matériel</span>
+              <span className="text-xl font-bold text-emerald-400 font-mono mt-1 block">Active (2 Ans)</span>
             </div>
           </div>
         </div>
@@ -150,7 +190,7 @@ const AccountContent = () => {
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Order History ({mockOrders.length})</span>
+            <span>Historique des Commandes ({orders.length})</span>
           </button>
 
           <button
@@ -162,7 +202,7 @@ const AccountContent = () => {
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>Warranties & Serial Claims</span>
+            <span>Garanties & Certifications</span>
           </button>
 
           <button
@@ -174,68 +214,111 @@ const AccountContent = () => {
             }`}
           >
             <User className="w-4 h-4" />
-            <span>Security & Preferences</span>
+            <span>Sécurité & Compte</span>
           </button>
         </div>
 
         {/* TAB CONTENTS */}
         {activeTab === 'orders' && (
           <div className="space-y-4">
-            {mockOrders.map((order) => (
-              <div
-                key={order.id}
-                className="rounded-3xl bg-[#121214]/80 border border-white/10 p-6 backdrop-blur-xl transition-all hover:border-white/20"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/5 gap-3">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-white font-mono text-base">
-                        {order.id}
-                      </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border ${order.statusColor}`}>
-                        {order.status}
-                      </span>
-                    </div>
-                    <span className="text-xs text-neutral-400 font-light mt-0.5 block">
-                      Ordered on {order.date}
-                    </span>
-                  </div>
-
-                  <div className="text-left sm:text-right">
-                    <span className="text-xs text-neutral-400 block">Total</span>
-                    <span className="text-base font-bold text-white font-mono">
-                      {order.total}
-                    </span>
-                  </div>
+            {ordersLoading ? (
+              <div className="p-12 text-center rounded-3xl bg-[#121214]/60 border border-white/10">
+                <span className="text-xs text-neutral-400">Chargement de vos commandes en cours...</span>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="p-12 text-center rounded-3xl bg-[#121214]/60 border border-white/10 space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 text-neutral-400 flex items-center justify-center mx-auto">
+                  <ShoppingBag className="w-6 h-6" />
                 </div>
-
-                <div className="py-4 space-y-2">
-                  {order.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 text-neutral-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#B600A8]" />
-                        <span>{item.qty}x {item.name}</span>
-                        <span className="text-neutral-500">({item.color})</span>
-                      </div>
-                    </div>
-                  ))}
+                <div>
+                  <h3 className="text-base font-bold text-white uppercase">Aucune commande pour le moment</h3>
+                  <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                    Toutes vos commandes validées avec PayPal, Carte Bancaire ou Apple Pay apparaîtront ici automatiquement avec leur numéro de suivi et reçus.
+                  </p>
                 </div>
-
-                <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2 text-neutral-400 font-mono">
-                    <Truck className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Tracking: {order.trackingNumber}</span>
-                  </div>
-
-                  <button
-                    onClick={() => navigateTo('shop')}
-                    className="text-xs text-[#BBCCD7] hover:text-white underline underline-offset-4 cursor-pointer"
-                  >
-                    View Order Details
-                  </button>
+                <div className="pt-2">
+                  <SecondaryButton onClick={() => navigateTo('shop')} size="sm">
+                    Découvrir les produits Veltrix
+                  </SecondaryButton>
                 </div>
               </div>
-            ))}
+            ) : (
+              orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="rounded-3xl bg-[#121214]/80 border border-white/10 p-6 backdrop-blur-xl transition-all hover:border-white/20"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/5 gap-3">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-white font-mono text-base">
+                          {order.id}
+                        </span>
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border ${
+                            order.status === 'paid'
+                              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                              : order.status === 'pending'
+                              ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                              : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+                          }`}
+                        >
+                          {order.status === 'paid' ? 'Payée & Confirmée' : order.status}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-mono uppercase bg-white/5 text-neutral-400 border border-white/5">
+                          {order.payment_provider || 'Paiement Sécurisé'}
+                        </span>
+                      </div>
+                      <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                        Commandé le {new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </span>
+                    </div>
+
+                    <div className="text-left sm:text-right">
+                      <span className="text-xs text-neutral-400 block">Total Réglé</span>
+                      <span className="text-base font-bold text-white font-mono">
+                        {formatPrice(order.total_amount)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Order items */}
+                  <div className="py-4 space-y-2">
+                    {order.order_items?.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-neutral-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#B600A8]" />
+                          <span>{item.quantity}x {item.product_name}</span>
+                          {item.color_name && <span className="text-neutral-500">({item.color_name})</span>}
+                        </div>
+                        <span className="font-mono text-neutral-400">
+                          {formatPrice(item.unit_price * item.quantity)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-neutral-400 font-mono">
+                      <Truck className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Réf Transaction : {order.provider_payment_id || order.id}</span>
+                    </div>
+
+                    {order.receipt_url && (
+                      <a
+                        href={order.receipt_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-cyan-400 hover:text-cyan-300 underline underline-offset-4 flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Télécharger le Reçu Officiel</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 
@@ -247,26 +330,17 @@ const AccountContent = () => {
               </div>
               <div>
                 <h3 className="text-lg font-bold uppercase text-white">
-                  2-Year Veltrix Protection Plan
+                  Garantie Veltrix 2 Ans Intégrée
                 </h3>
                 <p className="text-xs text-neutral-400">
-                  Every Veltrix device includes comprehensive thermal, component, and sound calibration guarantees.
+                  Chaque appareil et accessoire Veltrix bénéficie d'une garantie matérielle avec échange à neuf ou réparation certifiée.
                 </p>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs text-neutral-300 space-y-2 my-4">
-              <div>• <strong>Serial #VTX-739281-H2:</strong> AirPods Pro 2 (Coverage until October 2028)</div>
-              <div>• <strong>Serial #VTX-119280-CAB:</strong> 100W Kevlar Braided Cable (Lifetime replacement eligible)</div>
-            </div>
-
-            <div className="pt-2">
-              <SecondaryButton
-                onClick={() => alert('Support team notified. An agent will contact your account email.')}
-                size="sm"
-              >
-                File a Warranty Claim
-              </SecondaryButton>
+              <div>• <strong>Couverture :</strong> Composants internes, modules acoustiques, puces GaN et connecteurs MagSafe.</div>
+              <div>• <strong>Procédure de réclamation :</strong> Contactez le support technique avec votre référence de commande.</div>
             </div>
           </div>
         )}
@@ -275,21 +349,21 @@ const AccountContent = () => {
           <div className="rounded-3xl bg-[#121214]/80 border border-white/10 p-6 sm:p-8 backdrop-blur-xl space-y-6">
             <div>
               <h3 className="text-lg font-bold uppercase text-white mb-1">
-                Account Credentials
+                Identifiants & Sécurité du Compte
               </h3>
               <p className="text-xs text-neutral-400">
-                Manage your authenticated email and password preferences.
+                Gérez vos méthodes d’authentification sécurisées et vos préférences.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs">
-                <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Registered Email</span>
+                <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Adresse E-mail</span>
                 <span className="text-sm font-semibold text-white block mt-1">{userEmail}</span>
               </div>
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs">
-                <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Auth Provider</span>
-                <span className="text-sm font-semibold text-white block mt-1">Supabase Secure Cloud</span>
+                <span className="text-neutral-400 block text-[11px] uppercase tracking-wider">Fournisseur d'Authentification</span>
+                <span className="text-sm font-semibold text-white block mt-1">{providerInfo.name}</span>
               </div>
             </div>
 
@@ -298,7 +372,7 @@ const AccountContent = () => {
                 onClick={() => navigateTo('reset-password')}
                 size="sm"
               >
-                Update Password
+                Mettre à jour le Mot de Passe
               </SecondaryButton>
             </div>
           </div>

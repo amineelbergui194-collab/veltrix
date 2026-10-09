@@ -6,10 +6,11 @@ import { FormInput } from '../ui/FormInput';
 import { PasswordInput } from '../ui/PasswordInput';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { SocialAuthButtons } from '../ui/SocialAuthButtons';
+import { Mail, ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react';
 
 export const LoginPage = () => {
-  const { signInWithEmail, loading, authError, setAuthError, user } = useAuth();
+  const { signInWithEmail, loading, authError, setAuthError, user, isSupabaseConnected } = useAuth();
   const { navigateTo } = useShop();
 
   const [email, setEmail] = useState('');
@@ -28,14 +29,14 @@ export const LoginPage = () => {
   const validate = () => {
     const errors = {};
     if (!email) {
-      errors.email = 'Email address is required';
+      errors.email = 'L’adresse e-mail est requise';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = 'Veuillez saisir une adresse e-mail valide';
     }
     if (!password) {
-      errors.password = 'Password is required';
+      errors.password = 'Le mot de passe est requis';
     } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = 'Le mot de passe doit comporter au moins 6 caractères';
     }
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -58,111 +59,127 @@ export const LoginPage = () => {
 
   return (
     <AuthLayout
-      title="Welcome Back"
-      subtitle="Sign in with your Veltrix credentials to access your orders, warranties, and member benefits."
-      badgeText="Veltrix Portal Access"
+      title="Bienvenue sur Veltrix"
+      subtitle="Connectez-vous à votre espace personnel sécurisé pour accéder à vos commandes, garanties et avantages exclusifs."
+      badgeText="Portail Sécurisé Veltrix"
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Auth Error Banner */}
+      <div className="space-y-5">
+        {/* Supabase status warning if missing */}
+        {!isSupabaseConnected && (
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5 text-amber-300 text-xs">
+            <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+            <div className="leading-relaxed">
+              Configuration Supabase requise : configurez vos clés OAuth Google et Apple dans votre projet Supabase pour activer la connexion en production.
+            </div>
+          </div>
+        )}
+
+        {/* Global Auth Error Banner */}
         {authError && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3 text-rose-300 text-xs">
+          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-2.5 text-rose-300 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <div className="leading-relaxed">{authError}</div>
           </div>
         )}
 
-        {/* Email Field */}
-        <FormInput
-          id="login-email"
-          name="email"
-          label="Email Address"
-          type="email"
-          placeholder="your.email@domain.com"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            if (validationErrors.email) setValidationErrors((prev) => ({ ...prev, email: '' }));
-          }}
-          icon={Mail}
-          required
-          autoComplete="email"
-          error={validationErrors.email}
-        />
+        {/* 1. Official Google & Apple Sign-In Buttons + "OU" Divider */}
+        <SocialAuthButtons mode="login" />
 
-        {/* Password Field */}
-        <div>
-          <PasswordInput
-            id="login-password"
-            name="password"
-            label="Password"
-            placeholder="••••••••"
-            value={password}
+        {/* 2. Standard Email & Password Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Field */}
+          <FormInput
+            id="login-email"
+            name="email"
+            label="Adresse E-mail"
+            type="email"
+            placeholder="votre.email@domaine.com"
+            value={email}
             onChange={(e) => {
-              setPassword(e.target.value);
-              if (validationErrors.password) setValidationErrors((prev) => ({ ...prev, password: '' }));
+              setEmail(e.target.value);
+              if (validationErrors.email) setValidationErrors((prev) => ({ ...prev, email: '' }));
             }}
+            icon={Mail}
             required
-            autoComplete="current-password"
-            error={validationErrors.password}
+            autoComplete="email"
+            error={validationErrors.email}
           />
 
-          <div className="flex items-center justify-between mt-3 text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-neutral-400 hover:text-neutral-200">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded bg-[#141416] border-white/20 text-[#B600A8] focus:ring-[#B600A8] accent-[#B600A8]"
-              />
-              <span>Remember me</span>
-            </label>
+          {/* Password Field */}
+          <div>
+            <PasswordInput
+              id="login-password"
+              name="password"
+              label="Mot de passe"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (validationErrors.password) setValidationErrors((prev) => ({ ...prev, password: '' }));
+              }}
+              required
+              autoComplete="current-password"
+              error={validationErrors.password}
+            />
 
-            <button
-              type="button"
-              onClick={() => navigateTo('forgot-password')}
-              className="text-[#D7E2EA] hover:text-white underline underline-offset-4 decoration-white/20 transition-colors cursor-pointer"
-            >
-              Forgot password?
-            </button>
+            <div className="flex items-center justify-between mt-3 text-xs">
+              <label className="flex items-center gap-2 cursor-pointer text-neutral-400 hover:text-neutral-200">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded bg-[#141416] border-white/20 text-[#B600A8] focus:ring-[#B600A8] accent-[#B600A8]"
+                />
+                <span>Se souvenir de moi</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => navigateTo('forgot-password')}
+                className="text-[#D7E2EA] hover:text-white underline underline-offset-4 decoration-white/20 transition-colors cursor-pointer"
+              >
+                Mot de passe oublié ?
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <div className="pt-2">
-          <PrimaryButton
-            type="submit"
-            fullWidth
-            disabled={isSubmitting || loading}
-            size="lg"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <LoadingSpinner size="sm" />
-                <span>Signing In...</span>
-              </span>
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                <span>Sign In</span>
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            )}
-          </PrimaryButton>
-        </div>
-
-        {/* Sign Up Redirect */}
-        <div className="pt-4 text-center border-t border-white/5">
-          <p className="text-xs text-neutral-400">
-            Don't have a Veltrix account yet?{' '}
-            <button
-              type="button"
-              onClick={() => navigateTo('signup')}
-              className="text-white font-bold hover:text-[#BBCCD7] underline underline-offset-4 ml-1 cursor-pointer"
+          {/* Submit Button */}
+          <div className="pt-2">
+            <PrimaryButton
+              type="submit"
+              fullWidth
+              disabled={isSubmitting || loading}
+              size="lg"
             >
-              Create Account
-            </button>
-          </p>
-        </div>
-      </form>
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LoadingSpinner size="sm" />
+                  <span>Connexion en cours...</span>
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <span>Se connecter</span>
+                  <ArrowRight className="w-4 h-4" />
+                </span>
+              )}
+            </PrimaryButton>
+          </div>
+
+          {/* Sign Up Redirect */}
+          <div className="pt-4 text-center border-t border-white/5">
+            <p className="text-xs text-neutral-400">
+              Vous n’avez pas encore de compte Veltrix ?{' '}
+              <button
+                type="button"
+                onClick={() => navigateTo('signup')}
+                className="text-white font-bold hover:text-[#BBCCD7] underline underline-offset-4 ml-1 cursor-pointer"
+              >
+                Créer un compte
+              </button>
+            </p>
+          </div>
+        </form>
+      </div>
     </AuthLayout>
   );
 };
