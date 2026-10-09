@@ -104,6 +104,7 @@ export const AuthProvider = ({ children }) => {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/account`,
+          skipBrowserRedirect: true,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -115,7 +116,28 @@ export const AuthProvider = ({ children }) => {
         setAuthError(error.message);
         return { success: false, error: error.message };
       }
-      return { success: true, data };
+
+      if (data?.url) {
+        try {
+          const preflight = await fetch(data.url);
+          if (!preflight.ok) {
+            const errJson = await preflight.json().catch(() => ({}));
+            if (errJson.msg?.includes('provider is not enabled') || errJson.error_code === 'validation_failed') {
+              const msg =
+                "Le fournisseur Google n'est pas encore activé dans votre projet Supabase. Activez-le dans Supabase Dashboard > Authentication > Providers > Google.";
+              setAuthError(msg);
+              return { success: false, error: msg };
+            }
+          }
+        } catch {
+          // Preflight ignored if restricted by browser CORS, continue to redirect
+        }
+
+        window.location.href = data.url;
+        return { success: true, data };
+      }
+
+      return { success: false, error: "URL d'autorisation Google introuvable." };
     } catch (err) {
       const msg = err.message || 'Échec de la connexion avec Google.';
       setAuthError(msg);
@@ -133,6 +155,7 @@ export const AuthProvider = ({ children }) => {
         provider: 'apple',
         options: {
           redirectTo: `${window.location.origin}/account`,
+          skipBrowserRedirect: true,
           scopes: 'name email',
         },
       });
@@ -141,7 +164,28 @@ export const AuthProvider = ({ children }) => {
         setAuthError(error.message);
         return { success: false, error: error.message };
       }
-      return { success: true, data };
+
+      if (data?.url) {
+        try {
+          const preflight = await fetch(data.url);
+          if (!preflight.ok) {
+            const errJson = await preflight.json().catch(() => ({}));
+            if (errJson.msg?.includes('provider is not enabled') || errJson.error_code === 'validation_failed') {
+              const msg =
+                "Le fournisseur Apple n'est pas encore activé dans votre projet Supabase. Activez-le dans Supabase Dashboard > Authentication > Providers > Apple.";
+              setAuthError(msg);
+              return { success: false, error: msg };
+            }
+          }
+        } catch {
+          // Preflight ignored if restricted by browser CORS, continue to redirect
+        }
+
+        window.location.href = data.url;
+        return { success: true, data };
+      }
+
+      return { success: false, error: "URL d'autorisation Apple introuvable." };
     } catch (err) {
       const msg = err.message || "Échec de la connexion avec l'identifiant Apple.";
       setAuthError(msg);

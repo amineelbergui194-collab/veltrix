@@ -3,36 +3,38 @@
  * Supports Sandbox & Live modes with secure access token generation
  */
 
-const PAYPAL_MODE = process.env.PAYPAL_MODE || 'sandbox';
-const PAYPAL_BASE_URL =
-  PAYPAL_MODE === 'live'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
-
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || process.env.VITE_PAYPAL_CLIENT_ID || '';
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || '';
+function getPayPalConfig() {
+  const mode = process.env.PAYPAL_MODE || 'sandbox';
+  const baseUrl = mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const clientId = process.env.PAYPAL_CLIENT_ID || process.env.VITE_PAYPAL_CLIENT_ID || '';
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET || '';
+  return { mode, baseUrl, clientId, clientSecret };
+}
 
 // Conversion rate for international payment processing via PayPal
 // By default, PayPal accounts outside MAD settlement can charge in EUR (1 EUR ~ 10.8 MAD)
 const MAD_TO_EUR_RATE = 0.092;
 
 export function isPayPalConfigured() {
-  return Boolean(PAYPAL_CLIENT_ID && PAYPAL_CLIENT_SECRET);
+  const { clientId, clientSecret } = getPayPalConfig();
+  return Boolean(clientId && clientSecret);
 }
 
 /**
  * Obtains an OAuth 2.0 access token from PayPal
  */
 async function getPayPalAccessToken() {
-  if (!isPayPalConfigured()) {
+  const { baseUrl, clientId, clientSecret } = getPayPalConfig();
+
+  if (!clientId || !clientSecret) {
     throw new Error(
       'Identifiants PayPal non configurés. Renseignez PAYPAL_CLIENT_ID et PAYPAL_CLIENT_SECRET dans votre fichier .env.'
     );
   }
 
-  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
-  const response = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
+  const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${auth}`,
@@ -55,6 +57,7 @@ async function getPayPalAccessToken() {
  */
 export async function createPayPalOrder({ orderId, pricing, customerEmail = null }) {
   const accessToken = await getPayPalAccessToken();
+  const { baseUrl } = getPayPalConfig();
 
   // Determine PayPal currency (EUR by default for global Moroccan cross-border compatibility, or USD)
   const currency = process.env.PAYPAL_CURRENCY || 'EUR';
@@ -91,7 +94,7 @@ export async function createPayPalOrder({ orderId, pricing, customerEmail = null
     },
   };
 
-  const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
+  const response = await fetch(`${baseUrl}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -116,8 +119,9 @@ export async function createPayPalOrder({ orderId, pricing, customerEmail = null
  */
 export async function capturePayPalOrder(paypalOrderId) {
   const accessToken = await getPayPalAccessToken();
+  const { baseUrl } = getPayPalConfig();
 
-  const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${paypalOrderId}/capture`, {
+  const response = await fetch(`${baseUrl}/v2/checkout/orders/${paypalOrderId}/capture`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -154,6 +158,7 @@ export async function capturePayPalOrder(paypalOrderId) {
  */
 export async function verifyPayPalWebhookSignature(reqHeaders, rawBody, webhookId) {
   const accessToken = await getPayPalAccessToken();
+  const { baseUrl } = getPayPalConfig();
 
   const verificationPayload = {
     auth_algo: reqHeaders['paypal-auth-algo'],
@@ -166,7 +171,7 @@ export async function verifyPayPalWebhookSignature(reqHeaders, rawBody, webhookI
     webhook_event: typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody,
   };
 
-  const response = await fetch(`${PAYPAL_BASE_URL}/v1/notifications/verify-webhook-signature`, {
+  const response = await fetch(`${baseUrl}/v1/notifications/verify-webhook-signature`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
