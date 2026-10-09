@@ -1,4 +1,5 @@
 import React from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './context/AuthContext';
 import { ShopProvider, useShop } from './context/ShopContext';
 import { Navbar } from './components/Navbar';
@@ -122,6 +123,7 @@ export function App() {
     <AuthProvider>
       <ShopProvider>
         <AppShell />
+        <Analytics />
       </ShopProvider>
     </AuthProvider>
   );
