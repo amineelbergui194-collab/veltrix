@@ -164,6 +164,14 @@ export const Footer = () => {
                   Live Order Telemetry
                 </button>
               </li>
+              <li>
+                <button
+                  onClick={() => navigateTo('admin')}
+                  className="hover:text-cyan-300 transition-colors cursor-pointer text-cyan-400/90 font-medium"
+                >
+                  Administration Commandes (COD)
+                </button>
+              </li>
             </ul>
           </div>
 

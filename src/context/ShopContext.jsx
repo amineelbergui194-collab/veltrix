@@ -13,6 +13,7 @@ export const ShopProvider = ({ children }) => {
       if (path === '/forgot-password') return 'forgot-password';
       if (path === '/reset-password') return 'reset-password';
       if (path === '/account') return 'account';
+      if (path === '/admin') return 'admin';
       if (path === '/shop') return 'shop';
       if (path === '/cart') return 'cart';
       if (path === '/checkout') return 'checkout';
@@ -47,6 +48,7 @@ export const ShopProvider = ({ children }) => {
       else if (path === '/forgot-password') setCurrentView('forgot-password');
       else if (path === '/reset-password') setCurrentView('reset-password');
       else if (path === '/account') setCurrentView('account');
+      else if (path === '/admin') setCurrentView('admin');
       else if (path === '/shop') setCurrentView('shop');
       else if (path === '/cart') setCurrentView('cart');
       else if (path === '/checkout') setCurrentView('checkout');
@@ -268,6 +270,7 @@ export const ShopProvider = ({ children }) => {
       else if (view === 'forgot-password') targetPath = '/forgot-password';
       else if (view === 'reset-password') targetPath = '/reset-password';
       else if (view === 'account') targetPath = '/account';
+      else if (view === 'admin') targetPath = '/admin';
       else if (view === 'product-detail' && (product || selectedProduct)) {
         targetPath = `/product/${(product || selectedProduct).id}`;
       }

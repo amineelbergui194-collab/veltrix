@@ -89,6 +89,21 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS metadata JSONB;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
+-- Migration de compatibilité pour l'identifiant personnalisé de commande (ex: VELT-2026-XXXXX)
+DO $$
+BEGIN
+  ALTER TABLE public.order_items DROP CONSTRAINT IF EXISTS order_items_order_id_fkey;
+  ALTER TABLE public.orders ALTER COLUMN id TYPE TEXT;
+  ALTER TABLE public.order_items ALTER COLUMN order_id TYPE TEXT;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'order_items_order_id_fkey'
+  ) THEN
+    ALTER TABLE public.order_items ADD CONSTRAINT order_items_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE CASCADE;
+  END IF;
+EXCEPTION
+  WHEN others THEN NULL;
+END $$;
+
 -- Contrainte d'unicité sur provider_payment_id (évite les doublons de capture)
 DO $$
 BEGIN

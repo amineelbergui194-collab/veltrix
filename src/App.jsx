@@ -20,6 +20,7 @@ import { SignUpPage } from './components/auth/SignUpPage';
 import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { AccountPage } from './components/auth/AccountPage';
+import { AdminOrdersPage } from './components/admin/AdminOrdersPage';
 import { CartDrawer } from './components/CartDrawer';
 import { WishlistDrawer } from './components/WishlistDrawer';
 import { QuickViewModal } from './components/QuickViewModal';
@@ -64,6 +65,8 @@ const MainContent = () => {
       return <ResetPasswordPage />;
     case 'account':
       return <AccountPage />;
+    case 'admin':
+      return <AdminOrdersPage />;
     default:
       return (
         <main className="min-h-screen bg-[#0C0C0C]">

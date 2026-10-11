@@ -52,7 +52,35 @@ export async function persistOrder({
     });
 
     if (orderError) {
-      console.error('Supabase order insert error:', orderError.message);
+      // Si la table orders existante attend un type UUID pour id
+      if (orderError.message?.includes('invalid input syntax for type uuid')) {
+        const crypto = await import('node:crypto');
+        const fallbackUuid = crypto.randomUUID();
+        const { error: uuidErr } = await supabaseAdmin.from('orders').upsert({
+          id: fallbackUuid,
+          user_id: userId || null,
+          guest_email: guestEmail,
+          status,
+          payment_provider: paymentProvider,
+          provider_order_id: orderId,
+          provider_payment_id: providerPaymentId,
+          subtotal: pricing.subtotal,
+          discount_amount: pricing.discountAmount,
+          shipping_cost: pricing.shippingCost,
+          total_amount: pricing.totalAmount,
+          currency: pricing.currency,
+          shipping_address: shippingAddress,
+          receipt_url: receiptUrl,
+          idempotency_key: idempotencyKey,
+          updated_at: new Date().toISOString(),
+        });
+
+        if (!uuidErr) {
+          return { success: true, uuid: fallbackUuid };
+        }
+      }
+
+      console.warn('[Supabase persistOrder Warning]:', orderError.message);
       return { success: false, error: orderError.message };
     }
 
@@ -78,13 +106,13 @@ export async function persistOrder({
 
     return { success: true };
   } catch (err) {
-    console.error('Exception persisting order to Supabase:', err);
+    console.warn('Exception persisting order to Supabase:', err.message);
     return { success: false, error: err.message };
   }
 }
 
 /**
- * Updates order status upon verified payment confirmation (Webhook or Capture)
+ * Updates order status upon verified payment confirmation (Webhook or Capture or COD Cash Handover)
  */
 export async function markOrderPaid({
   orderId,
@@ -92,25 +120,33 @@ export async function markOrderPaid({
   receiptUrl = null,
 }) {
   try {
-    const { data, error } = await supabaseAdmin
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+
+    let query = supabaseAdmin
       .from('orders')
       .update({
         status: 'paid',
         provider_payment_id: providerPaymentId,
         receipt_url: receiptUrl,
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId)
-      .select();
+      });
+
+    if (isUuid) {
+      query = query.eq('id', orderId);
+    } else {
+      query = query.or(`id.eq.${orderId},provider_order_id.eq.${orderId}`);
+    }
+
+    const { data, error } = await query.select();
 
     if (error) {
-      console.error('Error marking order as paid:', error.message);
+      console.warn('[Supabase markOrderPaid Warning]:', error.message);
       return { success: false, error: error.message };
     }
 
     return { success: true, order: data?.[0] };
   } catch (err) {
-    console.error('Exception in markOrderPaid:', err);
+    console.warn('Exception in markOrderPaid:', err.message);
     return { success: false, error: err.message };
   }
 }

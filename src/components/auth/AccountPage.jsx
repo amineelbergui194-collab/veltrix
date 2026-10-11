@@ -56,16 +56,39 @@ const AccountContent = () => {
       }
 
       try {
+        let userOrders = [];
         const { data, error } = await supabase
           .from('orders')
           .select('*, order_items(*)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
-        if (error) {
-          console.warn('Orders fetch error (table may not exist yet):', error.message);
-        } else if (isSubscribed && data) {
-          setOrders(data);
+        if (!error && data) {
+          userOrders = [...data];
+        }
+
+        // Compléter avec les commandes locales / COD associées à l'email du compte
+        if (user?.email) {
+          try {
+            const apiRes = await fetch(`/api/admin/orders?search=${encodeURIComponent(user.email)}`);
+            if (apiRes.ok) {
+              const apiData = await apiRes.json();
+              if (apiData.orders && apiData.orders.length > 0) {
+                const existingIds = new Set(userOrders.map((o) => o.id));
+                for (const ord of apiData.orders) {
+                  if (!existingIds.has(ord.id)) {
+                    userOrders.push(ord);
+                  }
+                }
+              }
+            }
+          } catch {
+            // Ignorer si indisponible
+          }
+        }
+
+        if (isSubscribed) {
+          setOrders(userOrders);
         }
       } catch (err) {
         console.warn('Exception fetching orders:', err);
@@ -258,15 +281,29 @@ const AccountContent = () => {
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border ${
                             order.status === 'paid'
                               ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                              : order.status === 'pending'
+                              : order.status === 'pending' || order.status === 'pending_payment'
                               ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                              : order.status === 'shipped'
+                              ? 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20'
+                              : order.status === 'delivered'
+                              ? 'text-blue-400 bg-blue-500/10 border-blue-500/20'
                               : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
                           }`}
                         >
-                          {order.status === 'paid' ? 'Payée & Confirmée' : order.status}
+                          {order.status === 'paid'
+                            ? 'Payée & Confirmée'
+                            : order.status === 'pending' || order.status === 'pending_payment'
+                            ? 'En attente de paiement'
+                            : order.status === 'shipped'
+                            ? 'En cours de livraison'
+                            : order.status === 'delivered'
+                            ? 'Livrée'
+                            : order.status}
                         </span>
                         <span className="px-2 py-0.5 rounded-full text-[9px] font-mono uppercase bg-white/5 text-neutral-400 border border-white/5">
-                          {order.payment_provider || 'Paiement Sécurisé'}
+                          {order.payment_provider === 'cod'
+                            ? 'Paiement à la livraison'
+                            : order.payment_provider || 'Paiement Sécurisé'}
                         </span>
                       </div>
                       <span className="text-xs text-neutral-400 font-light mt-0.5 block">

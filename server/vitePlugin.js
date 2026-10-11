@@ -4,6 +4,11 @@ import {
   handleCapturePayPalOrder,
   handleStripeWebhook,
   handlePayPalWebhook,
+  handleCreateCodOrder,
+  handleGetAdminOrders,
+  handleUpdateAdminOrderStatus,
+  handleLookupOrder,
+  handleGetCodConfig,
 } from './apiHandlers.js';
 
 export function veltrixApiPlugin() {
@@ -31,30 +36,75 @@ export function veltrixApiPlugin() {
             }
           }
 
-          const url = req.url.split('?')[0];
+          const parsedUrl = new URL(req.url, 'http://localhost');
+          const path = parsedUrl.pathname;
+          const query = Object.fromEntries(parsedUrl.searchParams.entries());
 
-          if (url === '/api/create-payment-intent' && req.method === 'POST') {
+          // 1. Stripe PaymentIntent
+          if (path === '/api/create-payment-intent' && req.method === 'POST') {
             const data = await handleCreatePaymentIntent(parsedBody);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(data));
             return;
           }
 
-          if (url === '/api/paypal/create-order' && req.method === 'POST') {
+          // 2. PayPal Create & Capture Order
+          if (path === '/api/paypal/create-order' && req.method === 'POST') {
             const data = await handleCreatePayPalOrder(parsedBody);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(data));
             return;
           }
 
-          if (url === '/api/paypal/capture-order' && req.method === 'POST') {
+          if (path === '/api/paypal/capture-order' && req.method === 'POST') {
             const data = await handleCapturePayPalOrder(parsedBody);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(data));
             return;
           }
 
-          if (url === '/api/webhooks/stripe' && req.method === 'POST') {
+          // 3. Cash on Delivery (COD) Creation
+          if (path === '/api/cod/create-order' && req.method === 'POST') {
+            const data = await handleCreateCodOrder(parsedBody);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          // 4. COD Zones Configuration
+          if (path === '/api/cod/zones' && req.method === 'GET') {
+            const data = await handleGetCodConfig();
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          // 5. Admin Order Listing
+          if (path === '/api/admin/orders' && req.method === 'GET') {
+            const data = await handleGetAdminOrders(query);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          // 6. Admin Update Order Status
+          if (path === '/api/admin/orders/update-status' && req.method === 'POST') {
+            const data = await handleUpdateAdminOrderStatus(parsedBody);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          // 7. Order Real-time Lookup / Tracking
+          if (path === '/api/orders/lookup' && req.method === 'GET') {
+            const data = await handleLookupOrder(query);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          // 8. Webhooks
+          if (path === '/api/webhooks/stripe' && req.method === 'POST') {
             const sig = req.headers['stripe-signature'];
             const data = await handleStripeWebhook(rawBuffer, sig);
             res.setHeader('Content-Type', 'application/json');
@@ -62,7 +112,7 @@ export function veltrixApiPlugin() {
             return;
           }
 
-          if (url === '/api/webhooks/paypal' && req.method === 'POST') {
+          if (path === '/api/webhooks/paypal' && req.method === 'POST') {
             const data = await handlePayPalWebhook(req.headers, rawBuffer);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(data));
@@ -72,7 +122,7 @@ export function veltrixApiPlugin() {
           next();
         } catch (error) {
           console.error(`[API Dev Error] ${req.url}:`, error.message);
-          res.statusCode = 500;
+          res.statusCode = 400;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ error: error.message }));
         }

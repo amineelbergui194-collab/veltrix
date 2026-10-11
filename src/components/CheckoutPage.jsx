@@ -7,6 +7,7 @@ import { formatPrice } from '../data/products';
 import { StripeCardForm } from './payment/StripeCardForm';
 import { ApplePayButton } from './payment/ApplePayButton';
 import { PayPalSection } from './payment/PayPalSection';
+import { CashOnDeliverySection } from './payment/CashOnDeliverySection';
 import { GooglePlayInfoSection } from './payment/GooglePlayInfoSection';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import {
@@ -16,7 +17,9 @@ import {
   CreditCard,
   ArrowLeft,
   ExternalLink,
-  Smartphone
+  Smartphone,
+  Banknote,
+  Phone
 } from 'lucide-react';
 
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
@@ -57,7 +60,7 @@ export const CheckoutPage = () => {
   });
 
   const [shippingMethod, setShippingMethod] = useState('standard'); // 'standard', 'express', 'overnight'
-  const [selectedPaymentTab, setSelectedPaymentTab] = useState('card'); // 'card', 'apple-pay', 'paypal'
+  const [selectedPaymentTab, setSelectedPaymentTab] = useState('cod'); // 'cod', 'card', 'apple-pay', 'paypal'
 
   // Server-side Payment Intent State for Stripe
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
@@ -83,11 +86,13 @@ export const CheckoutPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Initialize Stripe PaymentIntent on the server whenever cart or shipping changes
+  // Initialize Stripe PaymentIntent only when card or apple-pay tab is active
   useEffect(() => {
     let isSubscribed = true;
 
     if (cart.length === 0 || confirmedOrder) return;
+    if (selectedPaymentTab !== 'card' && selectedPaymentTab !== 'apple-pay') return;
+    if (!isStripeConfigured) return;
 
     const initializeStripePayment = async () => {
       setIsInitializingPayment(true);
@@ -136,22 +141,41 @@ export const CheckoutPage = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [cart, shippingMethod, appliedPromo, formData, user, confirmedOrder]);
+  }, [cart, shippingMethod, appliedPromo, formData, user, confirmedOrder, selectedPaymentTab]);
 
-  // Handle successful payment
+  // Handle successful payment or order confirmation
   const handlePaymentSuccess = (paymentResult) => {
     const orderRef = paymentResult.orderId || serverOrderId || 'VELT-2026-CONFIRMED';
+    const isCod = paymentResult.method === 'cod';
+
     setConfirmedOrder({
       orderId: orderRef,
-      transactionId: paymentResult.paymentIntentId || paymentResult.captureId || 'TXN-CONFIRMED',
+      transactionId: isCod
+        ? 'Règlement en espèces à la livraison'
+        : paymentResult.paymentIntentId || paymentResult.captureId || 'TXN-CONFIRMED',
       method: paymentResult.method || selectedPaymentTab,
-      totalPaid: finalCheckoutTotal,
+      methodLabel: isCod
+        ? 'Paiement à la livraison (Cash on Delivery)'
+        : paymentResult.method === 'paypal'
+        ? 'PayPal Express'
+        : paymentResult.method === 'apple-pay'
+        ? 'Apple Pay'
+        : 'Carte Bancaire Sécurisée',
+      status: isCod ? 'pending_payment' : 'paid',
+      totalPaid: paymentResult.totalPaid || finalCheckoutTotal,
       email: formData.email,
-      address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
+      phone: formData.phone,
+      address: `${formData.address}, ${formData.city}, ${formData.state ? formData.state + ', ' : ''}${formData.country}`,
+      estimatedDeliveryTime: paymentResult.estimatedDeliveryTime || '24h à 48h ouvrées',
     });
 
     clearCart();
-    addToast(`Paiement validé avec succès ! Commande ${orderRef} enregistrée.`, 'success');
+
+    const toastMessage = isCod
+      ? `Commande ${orderRef} confirmée ! Préparez le montant en espèces pour la livraison.`
+      : `Paiement validé avec succès ! Commande ${orderRef} enregistrée.`;
+
+    addToast(toastMessage, 'success');
   };
 
   // 1. EMPTY CART VIEW
@@ -164,7 +188,7 @@ export const CheckoutPage = () => {
           </div>
           <h2 className="text-2xl font-bold uppercase text-white">Votre Panier est Vide</h2>
           <p className="text-xs text-neutral-400">
-            Ajoutez des articles au panier avant de procéder au règlement sécurisé.
+            Ajoutez des articles au panier avant de procéder au règlement de votre commande.
           </p>
           <div className="pt-2">
             <button
@@ -179,52 +203,108 @@ export const CheckoutPage = () => {
     );
   }
 
-  // 2. ORDER CONFIRMED SCREEN (PART 4: Account linking & confirmed receipt)
+  // 2. ORDER CONFIRMED SCREEN (FOR BOTH COD AND ONLINE PAYMENTS)
   if (confirmedOrder) {
+    const isCod = confirmedOrder.method === 'cod';
+
     return (
       <div className="py-16 bg-[#0C0C0C] text-[#D7E2EA] font-kanit min-h-screen">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center animate-in fade-in">
-          <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/20">
-            <CheckCircle2 className="w-10 h-10" />
+          {/* Status Icon */}
+          <div
+            className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl ${
+              isCod
+                ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400 shadow-amber-500/20'
+                : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-emerald-500/20'
+            }`}
+          >
+            {isCod ? <Banknote className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
           </div>
 
-          <span className="px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-300 uppercase tracking-widest">
-            Paiement Validé & Sécurisé
+          {/* Status Badge */}
+          <span
+            className={`px-3.5 py-1 rounded-full text-xs font-mono uppercase tracking-widest border ${
+              isCod
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+            }`}
+          >
+            {isCod ? 'En attente de paiement — Paiement à la livraison' : 'Paiement Validé & Sécurisé'}
           </span>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight mt-4 mb-2 text-white">
             Merci pour votre commande !
           </h1>
-          <p className="text-neutral-400 text-xs sm:text-sm max-w-md mx-auto mb-8">
-            Une confirmation détaillée et la facture ont été transmises à{' '}
-            <strong className="text-white">{confirmedOrder.email}</strong>.
+
+          <p className="text-neutral-400 text-xs sm:text-sm max-w-md mx-auto mb-6">
+            Votre commande <strong className="text-cyan-300">{confirmedOrder.orderId}</strong> a bien été enregistrée.
+            {isCod ? (
+              <span> Vous réglerez vos achats en espèces lors de la remise de votre colis par le transporteur.</span>
+            ) : (
+              <span> Une confirmation détaillée et la facture ont été transmises à <strong className="text-white">{confirmedOrder.email}</strong>.</span>
+            )}
           </p>
 
+          {/* COD Notice Box */}
+          {isCod && (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs text-left mb-6 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-amber-300">
+                <Phone className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Confirmation téléphonique par le transporteur</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-amber-200/90 font-sans">
+                Notre livreur ou notre équipe logistique prendra contact avec vous par téléphone au <strong className="text-white">{confirmedOrder.phone}</strong> avant la livraison pour confirmer l’adresse exacte et l’heure de passage.
+              </p>
+              <div className="flex items-center gap-1.5 text-[11px] text-amber-300 font-mono pt-1">
+                <Banknote className="w-4 h-4 text-amber-400" />
+                <span>Montant en espèces à préparer : <strong className="text-white text-xs">{formatPrice(confirmedOrder.totalPaid)}</strong></span>
+              </div>
+            </div>
+          )}
+
+          {/* Detailed Receipt Card */}
           <div className="p-6 rounded-3xl bg-[#121214] border border-white/10 text-left font-mono text-xs space-y-4 mb-8 shadow-2xl">
             <div className="flex justify-between border-b border-white/5 pb-3">
-              <span className="text-neutral-400">Référence Commande</span>
+              <span className="text-neutral-400">Numéro de Commande</span>
               <span className="text-cyan-300 font-bold">{confirmedOrder.orderId}</span>
             </div>
             <div className="flex justify-between border-b border-white/5 pb-3">
-              <span className="text-neutral-400">Transaction Processeur</span>
-              <span className="text-neutral-200">{confirmedOrder.transactionId}</span>
+              <span className="text-neutral-400">Méthode de Paiement</span>
+              <span className="text-neutral-200 font-semibold">{confirmedOrder.methodLabel}</span>
+            </div>
+            <div className="flex justify-between border-b border-white/5 pb-3">
+              <span className="text-neutral-400">Statut de la Commande</span>
+              <span
+                className={`font-bold uppercase ${
+                  isCod ? 'text-amber-300' : 'text-emerald-400'
+                }`}
+              >
+                {isCod ? 'En attente de paiement' : 'Payée & Confirmée'}
+              </span>
+            </div>
+            <div className="flex justify-between border-b border-white/5 pb-3">
+              <span className="text-neutral-400">Téléphone de Contact</span>
+              <span className="text-neutral-200">{confirmedOrder.phone}</span>
             </div>
             <div className="flex justify-between border-b border-white/5 pb-3">
               <span className="text-neutral-400">Adresse de Livraison</span>
-              <span className="text-neutral-200 text-right">{confirmedOrder.address}</span>
+              <span className="text-neutral-200 text-right max-w-xs truncate">{confirmedOrder.address}</span>
             </div>
             <div className="flex justify-between border-b border-white/5 pb-3">
-              <span className="text-neutral-400">Mode de Livraison</span>
+              <span className="text-neutral-400">Délai de Livraison</span>
               <span className="text-neutral-200 capitalize">
-                {shippingMethod} (Suivi Colis Prioritaire)
+                {confirmedOrder.estimatedDeliveryTime || '24h à 48h ouvrées'}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-1">
-              <span className="text-white">Montant Total Réglé</span>
+              <span className="text-white">
+                {isCod ? 'Montant à Payer à la Livraison' : 'Montant Total Réglé'}
+              </span>
               <span className="text-cyan-300">{formatPrice(confirmedOrder.totalPaid)}</span>
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {user ? (
               <button
@@ -269,13 +349,13 @@ export const CheckoutPage = () => {
               <span>Retour au Panier</span>
             </button>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight uppercase text-white">
-              Paiement Sécurisé
+              Paiement & Commande
             </h1>
           </div>
 
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300">
             <Lock className="w-4 h-4 text-cyan-400" />
-            <span>Chiffrement Bancaire TLS 256 bits & Anti-Fraude 3D Secure</span>
+            <span>Chiffrement TLS 256 bits & Vérification Logistique Sécurisée</span>
           </div>
         </div>
 
@@ -304,15 +384,21 @@ export const CheckoutPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Téléphone Portable</label>
+                  <label className="block text-xs font-mono text-neutral-400 mb-1">
+                    Téléphone Portable <span className="text-cyan-400">*</span>
+                  </label>
                   <input
                     type="tel"
                     name="phone"
                     required
                     value={formData.phone}
                     onChange={handleInputChange}
+                    placeholder="+212 6 XX XX XX XX"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:border-cyan-400 focus:outline-none"
                   />
+                  <span className="text-[10px] text-neutral-500 font-mono mt-1 block">
+                    Nécessaire pour l'appel du livreur avant remise du colis
+                  </span>
                 </div>
               </div>
             </div>
@@ -352,48 +438,96 @@ export const CheckoutPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Adresse (Rue, Numéro)</label>
+                <label className="block text-xs font-mono text-neutral-400 mb-1">Adresse Complète (Rue, Numéro)</label>
                 <input
                   type="text"
                   name="address"
                   required
                   value={formData.address}
                   onChange={handleInputChange}
+                  placeholder="Ex: 15 Boulevard d'Anfa, Résidence Al Manar"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:border-cyan-400 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Ville</label>
+                  <label className="block text-xs font-mono text-neutral-400 mb-1">
+                    Pays de Destination
+                  </label>
+                  <select
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
+                  >
+                    <option value="Morocco">Maroc (Paiement à la livraison éligible)</option>
+                    <option value="France">France (International)</option>
+                    <option value="Spain">Espagne (International)</option>
+                    <option value="Belgium">Belgique (International)</option>
+                    <option value="United States">États-Unis (International)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono text-neutral-400 mb-1">
+                    Ville <span className="text-cyan-400">*</span>
+                  </label>
                   <input
                     type="text"
                     name="city"
                     required
+                    list="morocco-cities-datalist"
                     value={formData.city}
                     onChange={handleInputChange}
+                    placeholder="Casablanca, Rabat, Marrakech..."
                     className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:border-cyan-400 focus:outline-none"
                   />
+                  <datalist id="morocco-cities-datalist">
+                    <option value="Casablanca" />
+                    <option value="Rabat" />
+                    <option value="Marrakech" />
+                    <option value="Tanger" />
+                    <option value="Agadir" />
+                    <option value="Fès" />
+                    <option value="Meknès" />
+                    <option value="Oujda" />
+                    <option value="Kenitra" />
+                    <option value="Tétouan" />
+                    <option value="Mohammedia" />
+                    <option value="El Jadida" />
+                    <option value="Safi" />
+                    <option value="Nador" />
+                    <option value="Béni Mellal" />
+                    <option value="Salé" />
+                    <option value="Témara" />
+                    <option value="Khouribga" />
+                    <option value="Dakhla" />
+                    <option value="Laâyoune" />
+                  </datalist>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Région</label>
+                  <label className="block text-xs font-mono text-neutral-400 mb-1">Région / Quartier</label>
                   <input
                     type="text"
                     name="state"
-                    required
                     value={formData.state}
                     onChange={handleInputChange}
+                    placeholder="Ex: Maarif / Gauthier"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:border-cyan-400 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Code Postal</label>
+                  <label className="block text-xs font-mono text-neutral-400 mb-1">Code Postal (Optionnel)</label>
                   <input
                     type="text"
                     name="zip"
-                    required
                     value={formData.zip}
                     onChange={handleInputChange}
+                    placeholder="20000"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:border-cyan-400 focus:outline-none"
                   />
                 </div>
@@ -414,19 +548,19 @@ export const CheckoutPage = () => {
                   {
                     id: 'standard',
                     name: 'Livraison Standard Sécurisée',
-                    time: '3–5 jours ouvrés',
+                    time: '2–3 jours ouvrés',
                     price: shippingCosts.standard === 0 ? 'GRATUIT' : formatPrice(shippingCosts.standard),
                   },
                   {
                     id: 'express',
                     name: 'Livraison Express Prioritaire',
-                    time: '1–2 jours ouvrés',
+                    time: '24–48 heures',
                     price: formatPrice(shippingCosts.express),
                   },
                   {
                     id: 'overnight',
                     name: 'Livraison 24h Chrono',
-                    time: 'Le lendemain avant 12h00',
+                    time: 'Le lendemain avant 13h00',
                     price: formatPrice(shippingCosts.overnight),
                   },
                 ].map((del) => (
@@ -468,49 +602,82 @@ export const CheckoutPage = () => {
                 <span>Moyens de Paiement Disponibles</span>
               </h2>
 
-              {/* Tabs de sélection */}
-              <div className="grid grid-cols-3 gap-2">
+              {/* 4 TABS DE SÉLECTION DONT PAIEMENT À LA LIVRAISON (COD) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {/* 1. Cash on Delivery (Paiement à la livraison) */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedPaymentTab('cod')}
+                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    selectedPaymentTab === 'cod'
+                      ? 'border-amber-400 bg-amber-500/15 text-amber-300 shadow-lg shadow-amber-500/10'
+                      : 'border-white/5 bg-neutral-950 text-neutral-400 hover:text-white hover:border-white/10'
+                  }`}
+                >
+                  <Banknote className="w-4 h-4 shrink-0 text-amber-400" />
+                  <span className="text-[11px] text-center">Paiement Livraison</span>
+                </button>
+
+                {/* 2. Carte Bancaire */}
                 <button
                   type="button"
                   onClick={() => setSelectedPaymentTab('card')}
-                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col sm:flex-row items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     selectedPaymentTab === 'card'
                       ? 'border-cyan-400 bg-white/10 text-white shadow-lg shadow-cyan-500/10'
                       : 'border-white/5 bg-neutral-950 text-neutral-400 hover:text-white hover:border-white/10'
                   }`}
                 >
-                  <CreditCard className="w-4 h-4 shrink-0" />
-                  <span>Carte Bancaire</span>
+                  <CreditCard className="w-4 h-4 shrink-0 text-cyan-400" />
+                  <span className="text-[11px] text-center">Carte Bancaire</span>
                 </button>
 
+                {/* 3. Apple Pay */}
                 <button
                   type="button"
                   onClick={() => setSelectedPaymentTab('apple-pay')}
-                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col sm:flex-row items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     selectedPaymentTab === 'apple-pay'
                       ? 'border-white bg-white text-black shadow-lg'
                       : 'border-white/5 bg-neutral-950 text-neutral-400 hover:text-white hover:border-white/10'
                   }`}
                 >
                   <Smartphone className="w-4 h-4 shrink-0" />
-                  <span> Apple Pay</span>
+                  <span className="text-[11px] text-center"> Apple Pay</span>
                 </button>
 
+                {/* 4. PayPal */}
                 <button
                   type="button"
                   onClick={() => setSelectedPaymentTab('paypal')}
-                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col sm:flex-row items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     selectedPaymentTab === 'paypal'
                       ? 'border-blue-500 bg-blue-600/20 text-blue-300 shadow-lg'
                       : 'border-white/5 bg-neutral-950 text-neutral-400 hover:text-white hover:border-white/10'
                   }`}
                 >
-                  <span className="italic font-bold font-serif">PayPal</span>
+                  <span className="italic font-bold font-serif text-sm">PayPal</span>
+                  <span className="text-[10px] text-neutral-400">En ligne</span>
                 </button>
               </div>
 
               {/* Contenu spécifique selon le mode de paiement sélectionné */}
               <div className="pt-2">
+                {/* A. PAIEMENT À LA LIVRAISON (COD) */}
+                {selectedPaymentTab === 'cod' && (
+                  <CashOnDeliverySection
+                    cartItems={cart}
+                    shippingMethod={shippingMethod}
+                    promoCode={appliedPromo}
+                    shippingAddress={formData}
+                    user={user}
+                    totalAmount={finalCheckoutTotal}
+                    onSuccess={handlePaymentSuccess}
+                    onError={(err) => addToast(err.message, 'error')}
+                  />
+                )}
+
+                {/* B. CARTE BANCAIRE STRIPE */}
                 {selectedPaymentTab === 'card' && (
                   <div>
                     {!isStripeConfigured ? (
@@ -547,6 +714,7 @@ export const CheckoutPage = () => {
                   </div>
                 )}
 
+                {/* C. APPLE PAY */}
                 {selectedPaymentTab === 'apple-pay' && (
                   <div>
                     {!isStripeConfigured ? (
@@ -572,6 +740,7 @@ export const CheckoutPage = () => {
                   </div>
                 )}
 
+                {/* D. PAYPAL */}
                 {selectedPaymentTab === 'paypal' && (
                   <div>
                     <PayPalSection
@@ -588,7 +757,7 @@ export const CheckoutPage = () => {
               </div>
             </div>
 
-            {/* 5. Section d'information Cartes Cadeaux Google Play (PART 2.4) */}
+            {/* 5. Section d'information Cartes Cadeaux Google Play */}
             <GooglePlayInfoSection />
           </div>
 
@@ -642,7 +811,9 @@ export const CheckoutPage = () => {
                   <span>Incluses (TTC)</span>
                 </div>
                 <div className="flex justify-between text-base font-bold text-white pt-3 border-t border-white/5">
-                  <span>Total à Payer</span>
+                  <span>
+                    {selectedPaymentTab === 'cod' ? 'Total à Régler à la Livraison' : 'Total à Payer'}
+                  </span>
                   <span className="text-cyan-300">{formatPrice(finalCheckoutTotal)}</span>
                 </div>
               </div>
@@ -654,7 +825,9 @@ export const CheckoutPage = () => {
                   <span className="font-bold">Garantie Veltrix 2 Ans & Satisfait ou Remboursé</span>
                 </div>
                 <p className="text-[10px] text-neutral-500 leading-relaxed font-sans">
-                  Paiement 100% sécurisé sans conservation de données bancaires. Débit uniquement après validation cryptographique.
+                  {selectedPaymentTab === 'cod'
+                    ? 'Paiement sécurisé en espèces à la livraison. Aucun débit bancaire préalable. Facture délivrée à la réception.'
+                    : 'Paiement 100% sécurisé sans conservation de données bancaires. Débit uniquement après validation cryptographique.'}
                 </p>
               </div>
             </div>

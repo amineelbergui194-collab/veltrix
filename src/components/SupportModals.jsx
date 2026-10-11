@@ -58,23 +58,71 @@ export const SupportModals = () => {
     addToast('Message sent! Our support team will respond within 4 hours.', 'success');
   };
 
-  const handleTrackingLookup = (e) => {
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState(null);
+
+  const handleTrackingLookup = async (e) => {
     e.preventDefault();
     if (!trackingId.trim()) return;
 
-    setTrackingResult({
-      id: trackingId.toUpperCase(),
-      status: 'In Transit',
-      carrier: 'FedEx Express Priority',
-      estimatedDelivery: 'Tomorrow, October 9, by 4:30 PM',
-      currentLocation: 'San Francisco Hub, CA',
-      steps: [
-        { title: 'Order Processed & Verified', time: 'Yesterday, 9:15 AM', done: true },
-        { title: 'Dispatched from Veltrix Distribution Hub', time: 'Yesterday, 2:40 PM', done: true },
-        { title: 'In Transit — Sorting Facility', time: 'Today, 6:15 AM', done: true },
-        { title: 'Out for Delivery', time: 'Expected Tomorrow', done: false },
-      ]
-    });
+    setTrackingLoading(true);
+    setTrackingError(null);
+
+    try {
+      const res = await fetch(`/api/orders/lookup?orderId=${encodeURIComponent(trackingId.trim())}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Numéro de commande introuvable.');
+      }
+
+      const ord = data.order;
+      const isCod = ord.paymentProvider === 'cod';
+      const statusLabel =
+        ord.status === 'paid'
+          ? 'Payée & Préparée'
+          : ord.status === 'shipped'
+          ? 'En cours de livraison'
+          : ord.status === 'delivered'
+          ? 'Colis Livré avec Succès'
+          : isCod
+          ? 'En attente de paiement à la livraison (COD)'
+          : 'En cours de validation';
+
+      setTrackingResult({
+        id: ord.id,
+        status: statusLabel,
+        carrier: isCod ? 'Veltrix Express (Paiement Espèces)' : 'Transporteur Prioritaire',
+        estimatedDelivery: 'Sous 24h à 48h ouvrées',
+        currentLocation: ord.shippingAddress?.city ? `Plateforme ${ord.shippingAddress.city}` : 'Centre Logistique Veltrix',
+        steps: [
+          {
+            title: 'Commande Enregistrée dans le Système',
+            time: new Date(ord.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+            done: true,
+          },
+          {
+            title: isCod ? 'Validation Téléphonique & Préparation du Colis' : 'Validation Bancaire & Conditionnement',
+            time: 'Centre Veltrix',
+            done: true,
+          },
+          {
+            title: `Expédition vers ${ord.shippingAddress?.city || 'votre ville'}`,
+            time: ord.status === 'shipped' || ord.status === 'delivered' ? 'En transit' : 'À venir',
+            done: ord.status === 'shipped' || ord.status === 'delivered',
+          },
+          {
+            title: isCod ? 'Remise en main propre contre règlement en espèces' : 'Remise en main propre au destinataire',
+            time: ord.status === 'delivered' ? 'Livré' : 'À la livraison',
+            done: ord.status === 'delivered',
+          },
+        ],
+      });
+    } catch (err) {
+      setTrackingError(err.message || 'Commande non trouvée.');
+      setTrackingResult(null);
+    } finally {
+      setTrackingLoading(false);
+    }
   };
 
   const handleSignIn = (e) => {
@@ -230,12 +278,25 @@ export const SupportModals = () => {
               </div>
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-neutral-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                disabled={trackingLoading}
+                className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-neutral-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Search className="w-4 h-4" />
-                <span>Track Package</span>
+                {trackingLoading ? (
+                  <span>Recherche du colis en cours...</span>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4" />
+                    <span>Track Package / Suivre Colis</span>
+                  </>
+                )}
               </button>
             </form>
+
+            {trackingError && (
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs mb-4">
+                {trackingError}
+              </div>
+            )}
 
             {trackingResult && (
               <div className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-4">
