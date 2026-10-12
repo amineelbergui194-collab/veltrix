@@ -172,7 +172,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 14,
     images: [
-      '/images/airpods-pro.png'
+      '/images/airpods-pro-3.webp'
     ],
     colors: [
       { name: 'White Gloss', hex: '#f8fafc', bg: 'bg-white' },
