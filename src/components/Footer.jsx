@@ -110,7 +110,7 @@ export const Footer = () => {
                   onClick={() => navigateTo('shop', null, 'cables-adapters')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  GaN Chargers & 100W Cables
+                  GaN Chargers & 60W Cables
                 </button>
               </li>
               <li>
@@ -235,10 +235,7 @@ export const Footer = () => {
               Apple Pay
             </span>
             <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
-              Visa
-            </span>
-            <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
-              MasterCard
+              PayPal
             </span>
             <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
               COD Available

@@ -4,17 +4,15 @@ import { Elements } from '@stripe/react-stripe-js';
 import { useShop } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../data/products';
-import { StripeCardForm } from './payment/StripeCardForm';
 import { ApplePayButton } from './payment/ApplePayButton';
 import { PayPalSection } from './payment/PayPalSection';
 import { CashOnDeliverySection } from './payment/CashOnDeliverySection';
 import { GooglePlayInfoSection } from './payment/GooglePlayInfoSection';
-import { LoadingSpinner } from './ui/LoadingSpinner';
 import {
   Lock,
   ShieldCheck,
   CheckCircle2,
-  CreditCard,
+  ShoppingBag,
   ArrowLeft,
   ExternalLink,
   Smartphone,
@@ -60,7 +58,7 @@ export const CheckoutPage = () => {
   });
 
   const [shippingMethod, setShippingMethod] = useState('standard'); // 'standard', 'express', 'overnight'
-  const [selectedPaymentTab, setSelectedPaymentTab] = useState('cod'); // 'cod', 'card', 'apple-pay', 'paypal'
+  const [selectedPaymentTab, setSelectedPaymentTab] = useState('cod'); // 'cod', 'apple-pay', 'paypal'
 
   // Server-side Payment Intent State for Stripe
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
@@ -86,12 +84,12 @@ export const CheckoutPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Initialize Stripe PaymentIntent only when card or apple-pay tab is active
+  // Initialize Stripe PaymentIntent only when apple-pay tab is active
   useEffect(() => {
     let isSubscribed = true;
 
     if (cart.length === 0 || confirmedOrder) return;
-    if (selectedPaymentTab !== 'card' && selectedPaymentTab !== 'apple-pay') return;
+    if (selectedPaymentTab !== 'apple-pay') return;
     if (!isStripeConfigured) return;
 
     const initializeStripePayment = async () => {
@@ -158,9 +156,7 @@ export const CheckoutPage = () => {
         ? 'Paiement à la livraison (Cash on Delivery)'
         : paymentResult.method === 'paypal'
         ? 'PayPal Express'
-        : paymentResult.method === 'apple-pay'
-        ? 'Apple Pay'
-        : 'Carte Bancaire Sécurisée',
+        : 'Apple Pay',
       status: isCod ? 'pending_payment' : 'paid',
       totalPaid: paymentResult.totalPaid || finalCheckoutTotal,
       email: formData.email,
@@ -184,7 +180,7 @@ export const CheckoutPage = () => {
       <div className="py-24 bg-[#0C0C0C] text-[#D7E2EA] font-kanit min-h-[70vh] flex items-center justify-center">
         <div className="max-w-md mx-auto px-4 text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-neutral-400">
-            <CreditCard className="w-8 h-8" />
+            <ShoppingBag className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold uppercase text-white">Votre Panier est Vide</h2>
           <p className="text-xs text-neutral-400">
@@ -602,8 +598,8 @@ export const CheckoutPage = () => {
                 <span>Moyens de Paiement Disponibles</span>
               </h2>
 
-              {/* 4 TABS DE SÉLECTION DONT PAIEMENT À LA LIVRAISON (COD) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* 3 TABS DE SÉLECTION DONT PAIEMENT À LA LIVRAISON (COD) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {/* 1. Cash on Delivery (Paiement à la livraison) */}
                 <button
                   type="button"
@@ -618,21 +614,7 @@ export const CheckoutPage = () => {
                   <span className="text-[11px] text-center">Paiement Livraison</span>
                 </button>
 
-                {/* 2. Carte Bancaire */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedPaymentTab('card')}
-                  className={`py-3 px-2 rounded-2xl border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    selectedPaymentTab === 'card'
-                      ? 'border-cyan-400 bg-white/10 text-white shadow-lg shadow-cyan-500/10'
-                      : 'border-white/5 bg-neutral-950 text-neutral-400 hover:text-white hover:border-white/10'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4 shrink-0 text-cyan-400" />
-                  <span className="text-[11px] text-center">Carte Bancaire</span>
-                </button>
-
-                {/* 3. Apple Pay */}
+                {/* 2. Apple Pay */}
                 <button
                   type="button"
                   onClick={() => setSelectedPaymentTab('apple-pay')}
@@ -646,7 +628,7 @@ export const CheckoutPage = () => {
                   <span className="text-[11px] text-center"> Apple Pay</span>
                 </button>
 
-                {/* 4. PayPal */}
+                {/* 3. PayPal */}
                 <button
                   type="button"
                   onClick={() => setSelectedPaymentTab('paypal')}
@@ -677,44 +659,7 @@ export const CheckoutPage = () => {
                   />
                 )}
 
-                {/* B. CARTE BANCAIRE STRIPE */}
-                {selectedPaymentTab === 'card' && (
-                  <div>
-                    {!isStripeConfigured ? (
-                      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300 space-y-2">
-                        <div className="flex items-center gap-2 font-medium">
-                          <ShieldCheck className="w-4 h-4 text-amber-400" />
-                          <span>Configuration Stripe Requise</span>
-                        </div>
-                        <p className="text-[11px] text-amber-200/80 leading-relaxed">
-                          Pour activer les paiements par carte bancaire en direct, renseignez vos clés <code className="text-white">VITE_STRIPE_PUBLISHABLE_KEY</code> et <code className="text-white">STRIPE_SECRET_KEY</code> dans le fichier <code className="text-white">.env</code>.
-                        </p>
-                      </div>
-                    ) : isInitializingPayment ? (
-                      <div className="p-8 text-center text-xs text-neutral-400 flex items-center justify-center gap-2">
-                        <LoadingSpinner size="sm" />
-                        <span>Sécurisation de la session bancaire en cours...</span>
-                      </div>
-                    ) : stripePromise && stripeClientSecret ? (
-                      <Elements stripe={stripePromise} options={{ clientSecret: stripeClientSecret }}>
-                        <StripeCardForm
-                          orderId={serverOrderId}
-                          clientSecret={stripeClientSecret}
-                          totalFormatted={formatPrice(finalCheckoutTotal)}
-                          billingDetails={formData}
-                          onSuccess={handlePaymentSuccess}
-                          onError={(err) => addToast(err.message, 'error')}
-                        />
-                      </Elements>
-                    ) : (
-                      <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
-                        {initError || 'Échec de connexion au serveur de paiement bancaire.'}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* C. APPLE PAY */}
+                {/* B. APPLE PAY */}
                 {selectedPaymentTab === 'apple-pay' && (
                   <div>
                     {!isStripeConfigured ? (
@@ -826,8 +771,8 @@ export const CheckoutPage = () => {
                 </div>
                 <p className="text-[10px] text-neutral-500 leading-relaxed font-sans">
                   {selectedPaymentTab === 'cod'
-                    ? 'Paiement sécurisé en espèces à la livraison. Aucun débit bancaire préalable. Facture délivrée à la réception.'
-                    : 'Paiement 100% sécurisé sans conservation de données bancaires. Débit uniquement après validation cryptographique.'}
+                    ? 'Paiement sécurisé en espèces à la livraison. Aucun paiement préalable. Facture délivrée à la réception.'
+                    : 'Paiement en ligne 100% sécurisé et chiffré sans conservation de données sensibles.'}
                 </p>
               </div>
             </div>

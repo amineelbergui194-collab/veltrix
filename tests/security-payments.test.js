@@ -8,6 +8,8 @@ import {
   isValidAddress,
   handleGetAdminOrders,
   handleUpdateAdminOrderStatus,
+  handleGetAdminProducts,
+  handleUpdateProductPrice,
 } from '../server/apiHandlers.js';
 import { isCodAvailableForZone } from '../server/codConfig.js';
 import { getOrderById } from '../server/orderStore.js';
@@ -28,6 +30,21 @@ test('1. Calcul de prix serveur valide pour un article du catalogue', () => {
   assert.equal(result.totalAmount, 145);
   assert.equal(result.currency, 'MAD');
   assert.equal(result.validatedItems.length, 1);
+  assert.equal(result.validatedItems[0].productName, 'AirPods Pro 2');
+});
+
+test('1b. Calcul de prix serveur valide pour AirPods Pro 3 (220 DH)', () => {
+  const result = calculateOrderPrice({
+    items: [{ productId: 'airpods-pro-3', quantity: 1 }],
+    shippingMethod: 'standard',
+  });
+
+  // airpods-pro-3 is 220 DH. Since 220 < 300 DH, standard shipping is 25 DH.
+  assert.equal(result.subtotal, 220);
+  assert.equal(result.shippingCost, 25);
+  assert.equal(result.totalAmount, 245);
+  assert.equal(result.currency, 'MAD');
+  assert.equal(result.validatedItems[0].productName, 'AirPods Pro 3');
 });
 
 test('2. Anti-fraude : Ignorer toute tentative de modification de prix côté navigateur', () => {
@@ -89,9 +106,9 @@ test('4. Validation des codes promo serveur (VELTRIX10 & FREESHIP)', () => {
 });
 
 test('5. Seuil de livraison gratuite (300 DH)', () => {
-  // apple-watch-ultra-edition is 300 DH (>= 300 DH -> free shipping)
+  // veltrix-3in1-foldable-magsafe is 150 DH (qty: 2 => 300 DH >= 300 DH -> free shipping)
   const result = calculateOrderPrice({
-    items: [{ productId: 'apple-watch-ultra-edition', quantity: 1 }],
+    items: [{ productId: 'veltrix-3in1-foldable-magsafe', quantity: 2 }],
     shippingMethod: 'standard',
   });
   assert.equal(result.subtotal, 300);
@@ -327,3 +344,119 @@ test('13. Admin COD : Consultation et encaissement en espèces (statut -> paid)'
   const updatedOrder = await getOrderById(orderId);
   assert.equal(updatedOrder.status, 'paid');
 });
+
+test('14. Produits supprimés : Rejet strict des commandes pour Smartwatch et Casque JBL', () => {
+  assert.throws(
+    () => calculateOrderPrice({ items: [{ productId: 'apple-watch-ultra-edition', quantity: 1 }] }),
+    /Produit introuvable dans le catalogue officiel : apple-watch-ultra-edition/
+  );
+  assert.throws(
+    () => calculateOrderPrice({ items: [{ productId: 'jbl-tune-wireless-headphones', quantity: 1 }] }),
+    /Produit introuvable dans le catalogue officiel : jbl-tune-wireless-headphones/
+  );
+});
+
+// ==============================================================================
+// 3. TESTS DU PRODUIT APPLE EARPODS (70 MAD / 70 DH) & ADMIN PRICE EDITING
+// ==============================================================================
+
+test('15. Apple EarPods : Calcul de prix serveur valide à 70 MAD (70 DH)', () => {
+  const result = calculateOrderPrice({
+    items: [{ productId: 'apple-earpods-lightning', quantity: 1 }],
+    shippingMethod: 'standard',
+  });
+
+  // Apple EarPods unit price = 70 DH. Subtotal < 300 DH -> standard shipping = 25 DH. Total = 95 MAD.
+  assert.equal(result.subtotal, 70);
+  assert.equal(result.shippingCost, 25);
+  assert.equal(result.totalAmount, 95);
+  assert.equal(result.currency, 'MAD');
+  assert.equal(result.validatedItems.length, 1);
+  assert.equal(result.validatedItems[0].productName, 'Apple EarPods with Lightning Connector');
+  assert.equal(result.validatedItems[0].unitPrice, 70);
+});
+
+test('16. Apple EarPods : Quantité multiple et seuil de livraison gratuite (300 DH)', () => {
+  // 5x Apple EarPods = 350 DH (350 >= 300 DH -> livraison gratuite 0 DH)
+  const result = calculateOrderPrice({
+    items: [{ productId: 'apple-earpods-lightning', quantity: 5 }],
+    shippingMethod: 'standard',
+  });
+
+  assert.equal(result.subtotal, 350);
+  assert.equal(result.shippingCost, 0);
+  assert.equal(result.totalAmount, 350);
+  assert.equal(result.currency, 'MAD');
+  assert.equal(result.validatedItems[0].quantity, 5);
+});
+
+test('17. Apple EarPods : Création d\'une commande COD complète (70 DH + 25 DH = 95 MAD)', async () => {
+  const codOrderPayload = {
+    items: [{ productId: 'apple-earpods-lightning', quantity: 1 }],
+    shippingMethod: 'standard',
+    shippingAddress: {
+      firstName: 'Mehdi',
+      lastName: 'Amrani',
+      phone: '+212 6 55 44 33 22',
+      address: '15 Boulevard d\'Anfa',
+      city: 'Casablanca',
+      country: 'Morocco',
+      zip: '20000',
+    },
+    deliveryNotes: 'Livraison express bureau',
+    idempotencyKey: `test_cod_earpods_${Date.now()}`,
+  };
+
+  const result = await handleCreateCodOrder(codOrderPayload);
+
+  assert.equal(result.success, true);
+  assert.match(result.orderId, /^VELT-2026-\d{5}$/);
+  assert.equal(result.totalAmount, 95);
+  assert.equal(result.subtotal, 70);
+  assert.equal(result.shippingCost, 25);
+  assert.equal(result.currency, 'MAD');
+  assert.equal(result.status, 'pending_payment');
+  assert.equal(result.paymentMethod, 'cod');
+});
+
+test('18. Admin : Modification dynamique du prix du produit puis réinitialisation', async () => {
+  // 1. Lister les produits via l'API admin
+  const listing = await handleGetAdminProducts();
+  assert.ok(listing.success);
+  const earpods = listing.products.find((p) => p.id === 'apple-earpods-lightning');
+  assert.ok(earpods, 'Apple EarPods doit figurer dans la liste des produits admin');
+
+  // 2. Mettre à jour le prix vers 85 MAD via l'API admin
+  const updateRes = await handleUpdateProductPrice({
+    productId: 'apple-earpods-lightning',
+    price: 85,
+  });
+  assert.ok(updateRes.success);
+  assert.equal(updateRes.newPrice, 85);
+
+  // 3. Vérifier que calculateOrderPrice prend en compte le nouveau prix de 85 MAD
+  const priceCheck = calculateOrderPrice({
+    items: [{ productId: 'apple-earpods-lightning', quantity: 1 }],
+    shippingMethod: 'standard',
+  });
+  assert.equal(priceCheck.subtotal, 85);
+  assert.equal(priceCheck.totalAmount, 110); // 85 + 25 shipping
+
+  // 4. Réinitialiser le prix à 70 MAD (prix initial requis)
+  const resetRes = await handleUpdateProductPrice({
+    productId: 'apple-earpods-lightning',
+    price: 70,
+  });
+  assert.ok(resetRes.success);
+  assert.equal(resetRes.newPrice, 70);
+
+  // 5. Vérifier que calculateOrderPrice revient à 70 MAD
+  const resetCheck = calculateOrderPrice({
+    items: [{ productId: 'apple-earpods-lightning', quantity: 1 }],
+    shippingMethod: 'standard',
+  });
+  assert.equal(resetCheck.subtotal, 70);
+  assert.equal(resetCheck.totalAmount, 95);
+});
+
+

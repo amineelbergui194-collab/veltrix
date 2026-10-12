@@ -7,6 +7,8 @@ import {
   handleCreateCodOrder,
   handleGetAdminOrders,
   handleUpdateAdminOrderStatus,
+  handleGetAdminProducts,
+  handleUpdateProductPrice,
   handleLookupOrder,
   handleGetCodConfig,
 } from './apiHandlers.js';
@@ -90,6 +92,21 @@ export function veltrixApiPlugin() {
           // 6. Admin Update Order Status
           if (path === '/api/admin/orders/update-status' && req.method === 'POST') {
             const data = await handleUpdateAdminOrderStatus(parsedBody);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          // 6b. Admin Products Catalog & Price Editing
+          if (path === '/api/admin/products' && req.method === 'GET') {
+            const data = await handleGetAdminProducts();
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return;
+          }
+
+          if (path === '/api/admin/products/update-price' && req.method === 'POST') {
+            const data = await handleUpdateProductPrice(parsedBody);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(data));
             return;

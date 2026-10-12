@@ -26,7 +26,7 @@ export const FeaturedCollectionsSection = () => {
 
   const filteredProducts = activeCategory === 'all'
     ? PRODUCTS.slice(0, 8)
-    : PRODUCTS.filter((p) => p.categorySlug === activeCategory).slice(0, 8);
+    : PRODUCTS.filter((p) => p.categorySlug === activeCategory || p.secondaryCategorySlug === activeCategory).slice(0, 8);
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();

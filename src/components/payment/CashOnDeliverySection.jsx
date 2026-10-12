@@ -154,7 +154,7 @@ export const CashOnDeliverySection = ({
           </div>
           <p className="text-[11px] text-rose-200/90 leading-relaxed font-sans">
             {zoneStatus.reason ||
-              `Le service d'encaissement à la livraison n'est pas actif pour « ${shippingAddress.country} ». Veuillez utiliser votre Carte Bancaire (Visa / Mastercard) ou PayPal pour valider votre commande.`}
+              `Le service d'encaissement à la livraison n'est pas actif pour « ${shippingAddress.country} ». Veuillez utiliser Apple Pay ou PayPal pour valider votre commande.`}
           </p>
         </div>
       )}

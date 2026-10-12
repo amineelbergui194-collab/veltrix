@@ -81,16 +81,23 @@ export const ShopProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('veltrix_cart');
-      return saved ? JSON.parse(saved) : [
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.filter(
+          (item) => item.product && PRODUCTS.some((p) => p.id === item.product.id)
+        );
+      }
+      const cableProduct = PRODUCTS.find((p) => p.id === 'usbc-fast-charging-cable-100w') || PRODUCTS[1];
+      return [
         {
           product: PRODUCTS[0], // AirPods Pro 2
           quantity: 1,
           selectedColor: PRODUCTS[0].colors[0]
         },
         {
-          product: PRODUCTS[4], // USB-C Fast Charging Cable 100W
+          product: cableProduct,
           quantity: 2,
-          selectedColor: PRODUCTS[4].colors[0]
+          selectedColor: cableProduct.colors[0]
         }
       ];
     } catch {
@@ -102,7 +109,11 @@ export const ShopProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState(() => {
     try {
       const saved = localStorage.getItem('veltrix_wishlist');
-      return saved ? JSON.parse(saved) : ['airpods-pro-2', 'apple-watch-ultra-edition'];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.filter((id) => PRODUCTS.some((p) => p.id === id));
+      }
+      return ['airpods-pro-2'];
     } catch {
       return ['airpods-pro-2'];
     }
@@ -116,6 +127,34 @@ export const ShopProvider = ({ children }) => {
 
   // Toast Notification state
   const [toasts, setToasts] = useState([]);
+
+  // Auto-clean storage on mount if outdated or deleted products are stored
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem('veltrix_cart');
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        const cleaned = parsed.filter(
+          (item) => item.product && PRODUCTS.some((p) => p.id === item.product.id)
+        );
+        if (cleaned.length !== parsed.length) {
+          setCart(cleaned);
+          localStorage.setItem('veltrix_cart', JSON.stringify(cleaned));
+        }
+      }
+      const savedWishlist = localStorage.getItem('veltrix_wishlist');
+      if (savedWishlist) {
+        const parsed = JSON.parse(savedWishlist);
+        const cleaned = parsed.filter((id) => PRODUCTS.some((p) => p.id === id));
+        if (cleaned.length !== parsed.length) {
+          setWishlist(cleaned);
+          localStorage.setItem('veltrix_wishlist', JSON.stringify(cleaned));
+        }
+      }
+    } catch (e) {
+      console.warn('Storage sync error', e);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -146,6 +185,15 @@ export const ShopProvider = ({ children }) => {
   };
 
   const addToCart = (product, quantity = 1, selectedColor = null) => {
+    if (!product || !product.id) return;
+    if (
+      product.id === 'apple-watch-ultra-edition' ||
+      product.id === 'jbl-tune-wireless-headphones' ||
+      !PRODUCTS.some((p) => p.id === product.id)
+    ) {
+      addToast('Ce produit n\'est plus disponible à l\'achat.', 'error');
+      return;
+    }
     const color = selectedColor || product.colors[0];
     setCart((prevCart) => {
       const existingIndex = prevCart.findIndex(
@@ -196,6 +244,14 @@ export const ShopProvider = ({ children }) => {
   };
 
   const toggleWishlist = (productId) => {
+    if (
+      productId === 'apple-watch-ultra-edition' ||
+      productId === 'jbl-tune-wireless-headphones' ||
+      !PRODUCTS.some((p) => p.id === productId)
+    ) {
+      addToast('Ce produit n\'est plus disponible.', 'error');
+      return;
+    }
     setWishlist((prev) => {
       const exists = prev.includes(productId);
       const prod = PRODUCTS.find((p) => p.id === productId);

@@ -52,7 +52,11 @@ export const ShopPage = () => {
           if (!item.name.toLowerCase().includes('cable')) return false;
         } else if (activeCategoryFilter === 'adapters') {
           if (!item.name.toLowerCase().includes('adapter') && !item.name.toLowerCase().includes('charger')) return false;
-        } else if (item.categorySlug !== activeCategoryFilter) {
+        } else if (
+          item.categorySlug !== activeCategoryFilter &&
+          item.secondaryCategorySlug !== activeCategoryFilter &&
+          item.category?.toLowerCase() !== activeCategoryFilter
+        ) {
           return false;
         }
       }
@@ -61,10 +65,12 @@ export const ShopPage = () => {
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
         const matchesName = item.name.toLowerCase().includes(query);
-        const matchesSub = item.subtitle.toLowerCase().includes(query);
-        const matchesCat = item.category.toLowerCase().includes(query);
-        const matchesDesc = item.description.toLowerCase().includes(query);
-        if (!matchesName && !matchesSub && !matchesCat && !matchesDesc) return false;
+        const matchesSub = item.subtitle?.toLowerCase().includes(query);
+        const matchesCat = item.category?.toLowerCase().includes(query);
+        const matchesFullCat = item.fullCategory?.toLowerCase().includes(query);
+        const matchesBrand = item.brand?.toLowerCase().includes(query);
+        const matchesDesc = item.description?.toLowerCase().includes(query);
+        if (!matchesName && !matchesSub && !matchesCat && !matchesFullCat && !matchesBrand && !matchesDesc) return false;
       }
 
       // Price filter

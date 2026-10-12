@@ -216,3 +216,75 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT OR UPDATE ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ------------------------------------------------------------------------------
+-- 5. Table du catalogue produits (products) & Insertion Apple EarPods
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.products (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  subtitle TEXT,
+  category TEXT NOT NULL,
+  category_slug TEXT NOT NULL,
+  brand TEXT DEFAULT 'Apple',
+  connector TEXT,
+  price NUMERIC(10, 2) NOT NULL DEFAULT 70.00,
+  original_price NUMERIC(10, 2),
+  currency TEXT NOT NULL DEFAULT 'MAD',
+  rating NUMERIC(3, 2) DEFAULT 4.8,
+  review_count INTEGER DEFAULT 0,
+  badge TEXT,
+  is_best_seller BOOLEAN DEFAULT false,
+  is_new BOOLEAN DEFAULT false,
+  in_stock BOOLEAN DEFAULT true,
+  stock_count INTEGER DEFAULT 0,
+  images JSONB NOT NULL DEFAULT '[]'::jsonb,
+  colors JSONB NOT NULL DEFAULT '[]'::jsonb,
+  description TEXT,
+  highlights JSONB,
+  specs JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS sur products (Lecture publique, insertion / mise à jour admin)
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Lecture publique du catalogue produits" ON public.products;
+CREATE POLICY "Lecture publique du catalogue produits"
+  ON public.products FOR SELECT
+  USING (true);
+
+-- Seed officiel pour le produit : Apple EarPods with Lightning Connector (70 DH / 70 MAD)
+INSERT INTO public.products (
+  id, name, subtitle, category, category_slug, brand, connector, price, original_price,
+  currency, rating, review_count, badge, is_best_seller, is_new, in_stock,
+  stock_count, images, colors, description
+) VALUES (
+  'apple-earpods-lightning',
+  'Apple EarPods with Lightning Connector',
+  'Lightning Connector with Built-in Remote and Microphone',
+  'Electronics → Audio & Headphones',
+  'headphones',
+  'Apple',
+  'Lightning',
+  70.00,
+  99.00,
+  'MAD',
+  4.8,
+  284,
+  'OFFICIAL APPLE',
+  true,
+  true,
+  true,
+  50,
+  '["/images/apple.jpg"]'::jsonb,
+  '[{"name": "White", "hex": "#ffffff", "bg": "bg-white"}]'::jsonb,
+  'Enjoy clear audio and comfortable everyday listening with Apple EarPods featuring a Lightning connector, designed for compatible Apple devices.'
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  price = EXCLUDED.price,
+  images = EXCLUDED.images,
+  description = EXCLUDED.description,
+  updated_at = NOW();
+

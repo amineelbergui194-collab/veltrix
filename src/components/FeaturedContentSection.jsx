@@ -19,7 +19,7 @@ export const FeaturedContentSection = () => {
     },
     {
       number: '02',
-      title: 'NEXT-GEN GaN & 100W POWER DELIVERY',
+      title: 'NEXT-GEN GaN & 60W POWER DELIVERY',
       subtitle: 'Intelligent Thermal Safety & Fast Inductive Wireless',
       description:
         'Miniaturized Gallium Nitride semiconductors replace old silicon for 3x cooler operation and instant full-speed recharging across your laptop, phone, and wearables simultaneously.',

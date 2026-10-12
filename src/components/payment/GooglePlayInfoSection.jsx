@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp, AlertTriangle, CreditCard } from 'lucide-react';
+import { HelpCircle, ChevronDown, ChevronUp, AlertTriangle, Smartphone } from 'lucide-react';
 
 /**
  * Google Play Gift Cards Information Section
@@ -58,8 +58,8 @@ export const GooglePlayInfoSection = () => {
           </div>
 
           <div className="pt-2 border-t border-neutral-800/60 flex items-center gap-2 text-cyan-400 font-medium">
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>Alternatives recommandées et sécurisées : Carte Bancaire (Visa / Mastercard), Apple Pay ou PayPal.</span>
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Alternatives recommandées et sécurisées : Apple Pay ou PayPal.</span>
           </div>
         </div>
       )}

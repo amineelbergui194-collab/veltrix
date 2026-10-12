@@ -1,5 +1,6 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
+import { PRODUCTS } from '../data/products';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 export const MarqueeSection = () => {
@@ -18,12 +19,12 @@ export const MarqueeSection = () => {
     },
     {
       id: 'm2',
-      title: 'Apple Watch Ultra 2',
-      tag: '49mm Titanium',
-      spec: '3000-Nit Sapphire • 100m Depth',
+      title: 'Titanium Link Bracelet',
+      tag: 'Grade 4 Titanium',
+      spec: 'Butterfly Clasp • DLC Armor',
       image: '/images/apple-watch-collection.png',
       badge: 'AEROSPACE',
-      productId: 'apple-watch-ultra-edition'
+      productId: 'titanium-link-apple-watch-band'
     },
     {
       id: 'm3',
@@ -36,11 +37,11 @@ export const MarqueeSection = () => {
     },
     {
       id: 'm4',
-      title: '100W Kevlar Braided Cable',
+      title: '60W USB-C Braided Cable',
       tag: 'Ultra Fast Charging',
       spec: 'E-Marker IC • 20,000 Bends',
-      image: '/images/usbc-cable.jpg',
-      badge: '100W PD 3.0',
+      image: '/images/usbc-cable.webp',
+      badge: '60W PD',
       productId: 'usbc-fast-charging-cable-100w'
     },
     {
@@ -63,12 +64,12 @@ export const MarqueeSection = () => {
     },
     {
       id: 'm7',
-      title: 'Apple Watch Series 10',
-      tag: 'Slim Jet Black',
-      spec: 'Wide-Angle OLED • Sleep Apnea',
-      image: '/images/apple-watch-collection.png',
-      badge: 'SERIES 10',
-      productId: 'apple-watch-series-10-aluminum'
+      title: 'MagSlim 10K Battery',
+      tag: 'Ultra-Thin Magnetic',
+      spec: '15W Snap Charge • Smart LED',
+      image: '/images/power-adapter.jpg',
+      badge: 'SLIM POWER',
+      productId: 'veltrix-magsafe-power-bank-10k'
     },
   ];
 

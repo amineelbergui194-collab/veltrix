@@ -453,7 +453,7 @@ export const SupportModals = () => {
                     <span>#VELT-73918</span>
                     <span className="text-emerald-400">Delivered</span>
                   </div>
-                  <div className="text-neutral-400 mt-1">AirPods Pro 2 • 100W USB-C Cable</div>
+                  <div className="text-neutral-400 mt-1">AirPods Pro 2 • 60W USB-C Cable</div>
                 </div>
 
                 <button

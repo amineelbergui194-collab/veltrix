@@ -10,7 +10,6 @@ import {
   Sparkles,
   Zap,
   Volume2,
-  Watch,
   BatteryCharging,
   Eye,
   Check
@@ -21,7 +20,7 @@ export const HeroSection = () => {
 
   const heroShowcaseItems = [
     {
-      product: PRODUCTS[0], // AirPods Pro 2
+      product: PRODUCTS.find((p) => p.id === 'airpods-pro-3') || PRODUCTS[0],
       badge: 'AUDIO FLAGSHIP',
       icon: Volume2,
       specTitle: '2x Active Noise Cancellation',
@@ -32,7 +31,7 @@ export const HeroSection = () => {
       statVal: '48kHz / 24-Bit',
     },
     {
-      product: PRODUCTS[2], // Horizon Over-Ear ANC
+      product: PRODUCTS.find((p) => p.id === 'veltrix-horizon-headphones') || PRODUCTS[1],
       badge: 'STUDIO REFERENCE',
       icon: Sparkles,
       specTitle: '60h Continuous Runtime',
@@ -43,26 +42,26 @@ export const HeroSection = () => {
       statVal: '60 Hours',
     },
     {
-      product: PRODUCTS[7], // Apple Watch Ultra 2
-      badge: 'RUGGED AEROSPACE',
-      icon: Watch,
-      specTitle: 'Aerospace Grade 49mm Titanium',
-      specSubtitle: '3000-Nit Sapphire Crystal • Dual-GPS',
+      product: PRODUCTS.find((p) => p.id === 'veltrix-3in1-foldable-magsafe') || PRODUCTS[2],
+      badge: 'MAGSAFE TRAVEL',
+      icon: Zap,
+      specTitle: '15W MagSafe 3-in-1 Fast Dock',
+      specSubtitle: 'Foldable Origami • iPhone, Watch & AirPods',
       glow: 'from-[#BE4C00]/20 via-[#B600A8]/15 to-transparent',
-      tag: 'Mil-Spec Extreme Durability',
-      statLabel: 'Depth Rating',
-      statVal: '100m Submersion',
+      tag: 'All-in-One Power Hub',
+      statLabel: 'Wireless Output',
+      statVal: '15W Fast Charge',
     },
     {
-      product: PRODUCTS[4], // USB-C 100W Cable
+      product: PRODUCTS.find((p) => p.id === 'usbc-fast-charging-cable-100w') || PRODUCTS[3],
       badge: 'ULTRA POWER DELIVERY',
       icon: BatteryCharging,
-      specTitle: '100W Fast Charging 3.0',
-      specSubtitle: 'Kevlar Reinforced Core • E-Marker IC',
+      specTitle: '60W Fast Charging PD',
+      specSubtitle: 'Woven Braided Core • Smart E-Marker IC',
       glow: 'from-[#FF8A3D]/20 via-[#7621B0]/15 to-transparent',
-      tag: 'Ballistic Fiber Strength',
+      tag: 'Durable Woven Strength',
       statLabel: 'Power Delivery',
-      statVal: '100W PD 3.0',
+      statVal: '60W PD',
     },
   ];
 
@@ -120,7 +119,7 @@ export const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="text-base sm:text-xl text-neutral-400 font-light max-w-xl leading-relaxed mb-10"
             >
-              Immerse yourself in precision-crafted acoustics, 100W intelligent power delivery, and aerospace titanium wearables. Designed for flawless fidelity and daily refinement.
+              Immerse yourself in precision-crafted acoustics, 60W intelligent power delivery, and aerospace titanium accessories. Designed for flawless fidelity and daily refinement.
             </motion.p>
 
             {/* CTAs: Gradient Pill Button & Secondary Button */}

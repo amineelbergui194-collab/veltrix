@@ -1,4 +1,8 @@
-import { calculateOrderPrice } from './pricing.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { PRODUCTS } from '../src/data/products.js';
+import { calculateOrderPrice, getServerProductPrice } from './pricing.js';
 import { createStripePaymentIntent, verifyStripeWebhookSignature } from './stripe.js';
 import { createPayPalOrder, capturePayPalOrder, verifyPayPalWebhookSignature } from './paypal.js';
 import { persistOrder, markOrderPaid } from './supabaseAdmin.js';
@@ -10,6 +14,12 @@ import {
   updateOrderStatus,
   checkDuplicateOrder,
 } from './orderStore.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = path.join(__dirname, 'data');
+const OVERRIDES_FILE = path.join(DATA_DIR, 'products-override.json');
+
 
 /**
  * Generates unique order identifier (e.g., VELT-2026-98172)
@@ -500,3 +510,74 @@ export async function handlePayPalWebhook(headers, rawBody) {
 
   return { received: true };
 }
+
+/**
+ * 11. GET /api/admin/products
+ * Permet à l'administrateur de consulter la liste des produits avec leurs prix actuels
+ */
+export async function handleGetAdminProducts() {
+  const products = PRODUCTS.map((p) => {
+    const currentPrice = getServerProductPrice(p.id, Number(p.price));
+    return {
+      ...p,
+      price: currentPrice,
+      isPriceOverridden: currentPrice !== Number(p.price),
+    };
+  });
+
+  return {
+    success: true,
+    products,
+  };
+}
+
+/**
+ * 12. POST /api/admin/products/update-price
+ * Permet à l'administrateur de modifier le prix d'un produit (ex: Apple EarPods)
+ */
+export async function handleUpdateProductPrice(body = {}) {
+  const { productId, price } = body;
+
+  if (!productId) {
+    throw new Error('Identifiant de produit manquant.');
+  }
+
+  const numPrice = Number(price);
+  if (isNaN(numPrice) || numPrice <= 0) {
+    throw new Error('Prix invalide : doit être un nombre strictement positif supérieur à 0.');
+  }
+
+  const catalogProduct = PRODUCTS.find((p) => p.id === productId);
+  if (!catalogProduct) {
+    throw new Error(`Produit introuvable dans le catalogue : ${productId}`);
+  }
+
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  let overrides = {};
+  if (fs.existsSync(OVERRIDES_FILE)) {
+    try {
+      overrides = JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf-8')) || {};
+    } catch {
+      overrides = {};
+    }
+  }
+
+  overrides[productId] = numPrice;
+  fs.writeFileSync(OVERRIDES_FILE, JSON.stringify(overrides, null, 2), 'utf-8');
+
+  // Met à jour la référence mémoire du catalogue
+  catalogProduct.price = numPrice;
+
+  return {
+    success: true,
+    productId,
+    productName: catalogProduct.name,
+    newPrice: numPrice,
+    currency: 'MAD',
+    message: `Le prix de « ${catalogProduct.name} » a été mis à jour : ${numPrice} MAD (${numPrice} DH).`,
+  };
+}
+

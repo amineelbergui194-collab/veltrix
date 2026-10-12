@@ -37,16 +37,19 @@ export const SearchModal = () => {
 
   if (!isSearchOpen) return null;
 
-  const popularSearches = ['AirPods Pro', '100W Cable', 'Apple Watch', 'GaN Charger', 'Over-Ear Headphones'];
+  const popularSearches = ['Apple EarPods', 'AirPods Pro', '60W Cable', 'Titanium Band', 'GaN Charger', 'Over-Ear Headphones'];
 
   const results = query.trim()
     ? PRODUCTS.filter((p) => {
         const q = query.toLowerCase();
         return (
           p.name.toLowerCase().includes(q) ||
-          p.subtitle.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
+          p.subtitle?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.fullCategory?.toLowerCase().includes(q) ||
+          p.brand?.toLowerCase().includes(q) ||
+          p.connector?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q)
         );
       }).slice(0, 5)
     : [];
@@ -79,7 +82,7 @@ export const SearchModal = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search audio, chargers, Apple Watch, cables..."
+            placeholder="Search audio, chargers, cables, accessories..."
             className="flex-1 bg-transparent text-base sm:text-lg text-white placeholder-neutral-500 focus:outline-none font-sans"
           />
           {query && (
@@ -122,7 +125,7 @@ export const SearchModal = () => {
                 {[
                   { name: 'AirPods & Earbuds', slug: 'airpods' },
                   { name: 'Over-Ear Headphones', slug: 'headphones' },
-                  { name: 'Apple Watch & Straps', slug: 'apple-watch' },
+                  { name: 'Watch Straps & Bands', slug: 'apple-watch' },
                   { name: 'Charging Cables', slug: 'cables-adapters' },
                   { name: 'GaN Power Adapters', slug: 'cables-adapters' },
                   { name: 'Magnetic Accessories', slug: 'accessories' },
@@ -180,7 +183,7 @@ export const SearchModal = () => {
           {query.trim() && results.length === 0 && (
             <div className="py-12 text-center text-neutral-400">
               <p className="text-sm font-semibold text-neutral-300">No products found for "{query}"</p>
-              <p className="text-xs text-neutral-500 mt-1">Try searching for keywords like "AirPods", "Cables", or "JBL".</p>
+              <p className="text-xs text-neutral-500 mt-1">Try searching for keywords like "AirPods", "Cables", or "Chargers".</p>
             </div>
           )}
         </div>

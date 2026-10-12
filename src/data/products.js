@@ -17,15 +17,15 @@ export const CATEGORIES = [
     id: 'headphones',
     name: 'Headphones',
     tagline: 'Immersive sound and modern design.',
-    count: '8 Products',
+    count: '7 Products',
     image: '/images/jbl-headphones.jpg',
     iconName: 'Speaker',
   },
   {
     id: 'apple-watch',
     name: 'Apple Watch',
-    tagline: 'Smart technology for your everyday life.',
-    count: '7 Products',
+    tagline: 'Premium titanium bands and wearable accessories.',
+    count: '6 Products',
     image: '/images/apple-watch-collection.png',
     iconName: 'Watch',
   },
@@ -34,7 +34,7 @@ export const CATEGORIES = [
     name: 'Cables & Adapters',
     tagline: 'Reliable charging and connectivity.',
     count: '12 Products',
-    image: '/images/usbc-cable.jpg',
+    image: '/images/usbc-cable.webp',
     iconName: 'Zap',
   },
   {
@@ -47,15 +47,123 @@ export const CATEGORIES = [
   },
 ];
 
+export const setProductPrice = (productId, newPrice) => {
+  const product = PRODUCTS.find((p) => p.id === productId);
+  if (product) {
+    const num = Number(newPrice);
+    if (!isNaN(num) && num > 0) {
+      product.price = num;
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          const overrides = JSON.parse(localStorage.getItem('veltrix_products_override') || '{}');
+          overrides[productId] = num;
+          localStorage.setItem('veltrix_products_override', JSON.stringify(overrides));
+        } catch {}
+      }
+      return true;
+    }
+  }
+  return false;
+};
+
+export const resetProductPrice = (productId) => {
+  const defaults = {
+    'apple-earpods-lightning': 70,
+    'airpods-pro-3': 220,
+    'airpods-pro-2': 120,
+    'veltrix-horizon-headphones': 110,
+    'usbc-fast-charging-cable-100w': 65,
+    'mfi-lightning-charging-cable': 65,
+    'veltrix-gan-compact-adapter': 70,
+    'titanium-link-apple-watch-band': 90,
+    'veltrix-3in1-foldable-magsafe': 150,
+    'veltrix-magsafe-power-bank-10k': 130,
+    'aluminum-desktop-device-stand': 80,
+  };
+  if (defaults[productId] !== undefined) {
+    return setProductPrice(productId, defaults[productId]);
+  }
+  return false;
+};
+
 export const PRODUCTS = [
   {
-    id: 'airpods-pro-2',
-    name: 'AirPods Pro 2',
+    id: 'apple-earpods-lightning',
+    name: 'Apple EarPods with Lightning Connector',
+    subtitle: 'Lightning Connector with Built-in Remote and Microphone',
+    category: 'Audio & Headphones',
+    fullCategory: 'Electronics → Audio & Headphones',
+    categorySlug: 'headphones',
+    secondaryCategorySlug: 'airpods',
+    brand: 'Apple',
+    connector: 'Lightning',
+    price: 70,
+    originalPrice: 99,
+    currency: 'MAD',
+    rating: 4.8,
+    reviewCount: 284,
+    badge: 'OFFICIAL APPLE',
+    isBestSeller: true,
+    isNew: true,
+    inStock: true,
+    stockCount: 50,
+    images: [
+      '/images/apple.jpg'
+    ],
+    colors: [
+      { name: 'White', hex: '#ffffff', bg: 'bg-white' }
+    ],
+    description: 'Enjoy clear audio and comfortable everyday listening with Apple EarPods featuring a Lightning connector, designed for compatible Apple devices.',
+    highlights: [
+      'Engineered by Apple with geometry designed for comfort and natural acoustic ear fit',
+      'High-performance dynamic speaker drivers designed to maximize sound output and minimize sound loss',
+      'Deeper, richer bass tones and crystal-clear high frequencies for music and voice',
+      'Built-in inline remote to adjust volume, control music and video playback, and answer or end calls',
+      'Integrated high-definition microphone for clear phone calls and Siri voice commands',
+      'Official Lightning connector offering seamless digital audio on iPhone, iPad, and iPod touch models'
+    ],
+    specs: {
+      'Brand': 'Apple',
+      'Model': 'EarPods with Lightning Connector',
+      'Product Type': 'Wired In-Ear Headphones',
+      'Connector': 'Lightning',
+      'Color': 'White',
+      'Audio Form Factor': 'Ergonomic In-Ear (EarPods Geometry)',
+      'Inline Controls': 'Volume control (+/-), Play/Pause, Call Answer/End',
+      'Microphone': 'Built-in High-Definition Voice Microphone',
+      'Audio Processing': 'Pure Digital Lightning Audio Output',
+      'Compatibility': 'All devices with a Lightning connector and iOS 10 or later (iPhone 14/13/12/11/SE/X/8/7, iPad)',
+      'Warranty': '1-Year Official Apple / Veltrix Warranty'
+    },
+    reviews: [
+      {
+        id: 'r-earpods-1',
+        author: 'Karim Mansouri',
+        rating: 5,
+        date: '2 days ago',
+        verified: true,
+        title: 'Original Apple quality at unbeatable price',
+        text: 'Crisp sound and the microphone works flawlessly for calls and voice notes. Exactly what I needed for my iPhone.'
+      },
+      {
+        id: 'r-earpods-2',
+        author: 'Yasmine Benjelloun',
+        rating: 5,
+        date: '1 week ago',
+        verified: true,
+        title: 'Authentic packaging and fast delivery',
+        text: 'Received within 24 hours in Casablanca. Perfect packaging and 100% genuine Apple EarPods with Lightning connector.'
+      }
+    ]
+  },
+  {
+    id: 'airpods-pro-3',
+    name: 'AirPods Pro 3',
     subtitle: 'Active Noise Cancellation with USB-C MagSafe Case',
     category: 'AirPods',
     categorySlug: 'airpods',
-    price: 120,
-    originalPrice: 150,
+    price: 220,
+    originalPrice: 280,
     rating: 4.9,
     reviewCount: 384,
     badge: 'BEST SELLER',
@@ -70,7 +178,7 @@ export const PRODUCTS = [
       { name: 'White Gloss', hex: '#f8fafc', bg: 'bg-white' },
       { name: 'Stealth Matte Skin', hex: '#18181b', bg: 'bg-neutral-900' }
     ],
-    description: 'Equipped with the upgraded H2 chip, AirPods Pro 2 deliver pro-level Active Noise Cancellation, Adaptive Audio that tailors sound control to your environment, and Personalized Spatial Audio with dynamic head tracking. Comes with a USB-C MagSafe Charging Case with built-in speaker and lanyard loop.',
+    description: 'Equipped with the upgraded H2 chip, AirPods Pro 3 deliver pro-level Active Noise Cancellation, Adaptive Audio that tailors sound control to your environment, and Personalized Spatial Audio with dynamic head tracking. Comes with a USB-C MagSafe Charging Case with built-in speaker and lanyard loop.',
     highlights: [
       'Up to 2x more Active Noise Cancellation compared to previous generation',
       'Adaptive Audio seamlessly blends ANC and Transparency mode',
@@ -109,13 +217,13 @@ export const PRODUCTS = [
     ]
   },
   {
-    id: 'airpods-pro-4-edition',
-    name: 'AirPods Pro 4 Studio Edition',
+    id: 'airpods-pro-2',
+    name: 'AirPods Pro 2',
     subtitle: 'Next-Gen Wireless Earbuds with Precision Acoustic Chambers',
     category: 'AirPods',
     categorySlug: 'airpods',
-    price: 180,
-    originalPrice: 220,
+    price: 120,
+    originalPrice: 150,
     rating: 4.8,
     reviewCount: 192,
     badge: 'NEW',
@@ -130,7 +238,7 @@ export const PRODUCTS = [
       { name: 'Midnight Titanium', hex: '#1e293b', bg: 'bg-slate-800' },
       { name: 'Pure Frost', hex: '#f1f5f9', bg: 'bg-slate-100' }
     ],
-    description: 'Designed for discerning listeners who demand studio-grade low latency and crystalline frequency balance. The AirPods Pro 4 Studio Edition incorporates high-definition dual graphene drivers, quad beamforming noise-isolating microphones, and an aerodynamic stem profile.',
+    description: 'Designed for discerning listeners who demand studio-grade low latency and crystalline frequency balance. The AirPods Pro 2 incorporates high-definition dual graphene drivers, quad beamforming noise-isolating microphones, and an aerodynamic stem profile.',
     highlights: [
       'High-resolution wireless audio streaming with ultra-low 35ms latency',
       'Hybrid Active Noise Cancellation blocking up to 38dB of ambient noise',
@@ -211,60 +319,9 @@ export const PRODUCTS = [
     ]
   },
   {
-    id: 'jbl-tune-wireless-headphones',
-    name: 'JBL Wireless Over-Ear Headset',
-    subtitle: 'Signature Pure Bass Sound with Multi-Device Connection',
-    category: 'Headphones',
-    categorySlug: 'headphones',
-    price: 110,
-    originalPrice: 140,
-    rating: 4.7,
-    reviewCount: 310,
-    badge: 'POPULAR',
-    isBestSeller: true,
-    isNew: false,
-    inStock: true,
-    stockCount: 18,
-    images: [
-      '/images/jbl-headphones.jpg'
-    ],
-    colors: [
-      { name: 'Matte Black', hex: '#0a0a0a', bg: 'bg-black' },
-      { name: 'Deep Navy', hex: '#1e3a8a', bg: 'bg-blue-900' }
-    ],
-    description: 'Renowned JBL Pure Bass Sound packed into a comfortable, foldable design. Features active environmental noise management, 50-hour battery lifespan, and quick speed charging that provides 2 hours of juice in just 5 minutes.',
-    highlights: [
-      'Authentic JBL Pure Bass Acoustic Profile',
-      'Active Noise Cancellation with Smart Ambient technology',
-      'Up to 50 Hours of continuous playback (44h with ANC)',
-      'Speed Charge: 5 minutes gives 2 additional hours of music',
-      'Lightweight folding design with integrated earcup controls'
-    ],
-    specs: {
-      'Driver Size': '40mm Dynamic Driver',
-      'Bluetooth Version': '5.0',
-      'Battery Capacity': '610 mAh Polymer Li-ion',
-      'Charging Time': '2 hours from empty',
-      'Weight': '220g',
-      'Compatibility': 'Universal Bluetooth Android, iOS, Windows, Mac',
-      'Warranty': '1-Year Limited Manufacturer Warranty'
-    },
-    reviews: [
-      {
-        id: 'r5',
-        author: 'Rachel K.',
-        rating: 5,
-        date: '2 weeks ago',
-        verified: true,
-        title: 'Bass is punchy without distorting vocals',
-        text: 'Great daily drivers for gym and study sessions. Very lightweight and fold up neatly into my backpack.'
-      }
-    ]
-  },
-  {
     id: 'usbc-fast-charging-cable-100w',
-    name: 'USB-C Fast Charging Cable (100W)',
-    subtitle: 'Braided Kevlar Core with E-Marker Smart Chip (2m)',
+    name: 'USB-C Fast Charging Cable (60W)',
+    subtitle: 'Woven Braided Core with E-Marker Smart Chip (1m)',
     category: 'Cables & Adapters',
     categorySlug: 'cables-adapters',
     price: 65,
@@ -277,25 +334,26 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 85,
     images: [
-      '/images/usbc-cable.jpg'
+      '/images/usbc-cable.webp'
     ],
     colors: [
+      { name: 'White Braided', hex: '#f8fafc', bg: 'bg-white' },
       { name: 'Space Gray Braided', hex: '#4b5563', bg: 'bg-gray-600' },
       { name: 'Obsidian Black', hex: '#18181b', bg: 'bg-neutral-900' }
     ],
-    description: 'Engineered with double-woven ballistic nylon and reinforced with DuPont Kevlar fibers, this 100W USB-C cable powers everything from iPhone 15/16 and iPad Pro to 16-inch MacBook Pros at maximum rated speed without heating up.',
+    description: 'Engineered with double-woven durable braiding, this 60W USB-C cable powers everything from iPhone 15/16 and iPad Pro to MacBook Air and laptops at maximum rated speed without heating up.',
     highlights: [
-      '100W (20V/5A) Power Delivery 3.0 ultra-rapid charging',
+      '60W (20V/3A) Power Delivery ultra-rapid charging',
       'Integrated E-Marker Smart Chip prevents overvoltage & overheating',
       '30,000+ bend lifespan rating with aluminum alloy strain relief collars',
       '480 Mbps high-speed synchronous data transfer',
-      'Generous 6.6ft (2 meter) length with complimentary leather cable organizer'
+      'Compact 3.3ft (1 meter) length with complimentary leather cable organizer'
     ],
     specs: {
-      'Maximum Power': '100W (20V / 5A)',
+      'Maximum Power': '60W (20V / 3A)',
       'Data Transfer Rate': '480 Mbps (USB 2.0 Standard)',
-      'Cable Length': '2.0m (6.6 ft)',
-      'Jacket Material': 'Double-braided Ballistic Nylon Armor',
+      'Cable Length': '1.0m (3.3 ft)',
+      'Jacket Material': 'Double-braided Woven Armor',
       'Connectors': 'Anodized Aluminum Housings with Gold-plated Pins',
       'Warranty': 'Lifetime Replacement Warranty'
     },
@@ -307,7 +365,7 @@ export const PRODUCTS = [
         date: '1 day ago',
         verified: true,
         title: 'The sturdiest USB-C cable I own',
-        text: 'Charges my MacBook Pro 16 inch and iPhone 16 at top speed. The cable doesn’t kink or fray around the connector necks.'
+        text: 'Charges my MacBook and iPhone 16 at top speed. The cable doesn’t kink or fray around the connector necks.'
       }
     ]
   },
@@ -327,7 +385,7 @@ export const PRODUCTS = [
     inStock: true,
     stockCount: 64,
     images: [
-      '/images/usbc-cable.jpg'
+      '/images/lightning-cable.jpg'
     ],
     colors: [
       { name: 'Silver White', hex: '#f8fafc', bg: 'bg-white' },
@@ -409,57 +467,6 @@ export const PRODUCTS = [
         verified: true,
         title: 'My favorite travel companion',
         text: 'Charges my phone and watch at night from one tiny outlet block. Doesn’t get warm at all.'
-      }
-    ]
-  },
-  {
-    id: 'apple-watch-ultra-edition',
-    name: 'Apple Watch Ultra 2 Edition',
-    subtitle: 'Rugged Titanium GPS + Cellular with Orange Alpine Loop',
-    category: 'Apple Watch',
-    categorySlug: 'apple-watch',
-    price: 300,
-    originalPrice: 380,
-    rating: 4.9,
-    reviewCount: 154,
-    badge: 'FLAGSHIP',
-    isBestSeller: true,
-    isNew: true,
-    inStock: true,
-    stockCount: 6,
-    images: [
-      '/images/apple-watch-collection.png'
-    ],
-    colors: [
-      { name: 'Natural Titanium', hex: '#94a3b8', bg: 'bg-slate-400' },
-      { name: 'Dark Titanium', hex: '#334155', bg: 'bg-slate-700' }
-    ],
-    description: 'The most capable and rugged smartwatch ever built. Featuring an aerospace-grade 49mm titanium case, customizable Action button, 3000 nit sapphire crystal display, dual-frequency precision GPS, and up to 72 hours of battery in Low Power Mode.',
-    highlights: [
-      '49mm Aerospace-grade Titanium Case with raised bezel for edge protection',
-      'Ultra-bright 3,000 nit Always-On Retina display readable under direct sun',
-      'Precision Dual-Frequency GPS (L1 and L5) for exact route metrics',
-      '100m Water Resistance & EN13319 dive computer certification to 40m',
-      'Up to 36 hours regular battery life / 72 hours in Low Power Mode'
-    ],
-    specs: {
-      'Case Size': '49mm',
-      'Case Material': 'Aerospace Grade Titanium',
-      'Glass': 'Flat Sapphire Crystal Display',
-      'Water Resistance': '100m (WR100) / Dive certified to 40m',
-      'Connectivity': 'Cellular LTE & UMTS, Wi-Fi 4, Bluetooth 5.3, U2 Chip',
-      'Battery': 'Up to 36 hours standard / 72 hours low power',
-      'Warranty': '1-Year Official Manufacturer Warranty'
-    },
-    reviews: [
-      {
-        id: 'r9',
-        author: 'Capt. Brandon Lee',
-        rating: 5,
-        date: '1 week ago',
-        verified: true,
-        title: 'Unbelievable battery life and screen',
-        text: 'I run ultra-marathons and this is the only watch that tracks dual-band GPS all day without flinching. Titanium casing takes knocks easily.'
       }
     ]
   },
@@ -704,18 +711,18 @@ export const CUSTOMER_REVIEWS = [
     name: 'Maya Lin',
     role: 'Senior Software Engineer',
     rating: 5,
-    product: 'USB-C Fast Charging Cable (100W)',
+    product: 'USB-C Fast Charging Cable (60W)',
     date: 'Verified Buyer • 1 week ago',
-    text: 'The 100W Kevlar braided cables are without question the finest I have ever used. Handles my MacBook Pro and fast phone charging effortlessly without any overheating or crimping.'
+    text: 'The 60W braided cables are without question the finest I have ever used. Handles my MacBook Air and fast phone charging effortlessly without any overheating or crimping.'
   },
   {
     id: 'rev-3',
     name: 'Harrison Sterling',
     role: 'Product Architect',
     rating: 5,
-    product: 'Apple Watch Ultra 2 Edition',
+    product: 'Titanium Link Bracelet for Apple Watch',
     date: 'Verified Buyer • 2 weeks ago',
-    text: 'Impeccable packaging, pristine authentic hardware, and transparent customer support. The titanium bracelet pairing transforms the watch into an executive showpiece.'
+    text: 'Impeccable packaging, pristine authentic hardware, and transparent customer support. The titanium bracelet pairing transforms the wrist into an executive showpiece.'
   },
   {
     id: 'rev-4',
@@ -747,6 +754,19 @@ export const FAQS = [
   },
   {
     question: 'Which payment methods do you accept?',
-    answer: 'We accept all major credit cards (Visa, MasterCard, American Express), Apple Pay, Google Pay, PayPal, and Shop Pay with end-to-end 256-bit SSL encryption.'
+    answer: 'We accept Cash on Delivery (Paiement à la livraison), Apple Pay, and PayPal with end-to-end 256-bit SSL encryption.'
   }
 ];
+
+// Initialize price overrides from client storage if available
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const overrides = JSON.parse(localStorage.getItem('veltrix_products_override') || '{}');
+    PRODUCTS.forEach((p) => {
+      if (overrides[p.id] !== undefined && typeof overrides[p.id] === 'number') {
+        p.price = overrides[p.id];
+      }
+    });
+  } catch {}
+}
+

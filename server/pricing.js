@@ -1,4 +1,24 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PRODUCTS } from '../src/data/products.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = path.join(__dirname, 'data');
+const OVERRIDES_FILE = path.join(DATA_DIR, 'products-override.json');
+
+export function getServerProductPrice(productId, fallbackPrice) {
+  try {
+    if (fs.existsSync(OVERRIDES_FILE)) {
+      const data = JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf-8'));
+      if (data && typeof data[productId] === 'number' && data[productId] > 0) {
+        return data[productId];
+      }
+    }
+  } catch {}
+  return fallbackPrice;
+}
 
 /**
  * Server-Side Order Pricing Validator
@@ -22,12 +42,13 @@ export function calculateOrderPrice({ items, shippingMethod = 'standard', promoC
       throw new Error(`Article invalide dans le panier : ${JSON.stringify(item)}`);
     }
 
-    const catalogProduct = PRODUCTS.find((p) => p.id === productId);
+    const resolvedId = productId === 'airpods-pro-4-edition' ? 'airpods-pro-2' : productId;
+    const catalogProduct = PRODUCTS.find((p) => p.id === resolvedId);
     if (!catalogProduct) {
       throw new Error(`Produit introuvable dans le catalogue officiel : ${productId}`);
     }
 
-    const unitPrice = Number(catalogProduct.price);
+    const unitPrice = getServerProductPrice(catalogProduct.id, Number(catalogProduct.price));
     const lineTotal = unitPrice * quantity;
     subtotal += lineTotal;
 

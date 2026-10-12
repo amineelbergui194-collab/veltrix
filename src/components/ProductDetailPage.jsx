@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useShop } from '../context/ShopContext';
 import { PRODUCTS, formatPrice } from '../data/products';
 import { ProductCard } from './ProductCard';
@@ -27,13 +27,23 @@ export const ProductDetailPage = () => {
 
   const product = selectedProduct || PRODUCTS[0];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || { name: 'White', hex: '#ffffff', bg: 'bg-white' });
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('specs'); // 'specs', 'shipping', 'reviews'
   const [newReviewAuthor, setNewReviewAuthor] = useState('');
   const [newReviewText, setNewReviewText] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [reviewsList, setReviewsList] = useState(product.reviews || []);
+
+  useEffect(() => {
+    if (product?.colors?.length > 0) {
+      setSelectedColor(product.colors[0]);
+    }
+    setSelectedImageIndex(0);
+    setQuantity(1);
+    setReviewsList(product.reviews || []);
+  }, [product?.id]);
+
 
   const wishlisted = isWishlisted(product.id);
 
