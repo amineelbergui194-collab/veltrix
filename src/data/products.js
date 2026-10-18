@@ -71,14 +71,11 @@ export const resetProductPrice = (productId) => {
     'apple-earpods-lightning': 70,
     'airpods-pro-3': 220,
     'airpods-pro-2': 120,
-    'veltrix-horizon-headphones': 110,
     'usbc-fast-charging-cable-100w': 65,
     'mfi-lightning-charging-cable': 65,
     'veltrix-gan-compact-adapter': 70,
-    'titanium-link-apple-watch-band': 90,
     'veltrix-3in1-foldable-magsafe': 150,
     'veltrix-magsafe-power-bank-10k': 130,
-    'aluminum-desktop-device-stand': 80,
   };
   if (defaults[productId] !== undefined) {
     return setProductPrice(productId, defaults[productId]);
@@ -268,57 +265,6 @@ export const PRODUCTS = [
     ]
   },
   {
-    id: 'veltrix-horizon-headphones',
-    name: 'Veltrix Horizon Wireless ANC',
-    subtitle: 'Audiophile Over-Ear Headphones with 45mm Drivers',
-    category: 'Headphones',
-    categorySlug: 'headphones',
-    price: 110,
-    originalPrice: 150,
-    rating: 4.9,
-    reviewCount: 247,
-    badge: 'STAFF PICK',
-    isBestSeller: true,
-    isNew: false,
-    inStock: true,
-    stockCount: 9,
-    images: [
-      '/images/jbl-headphones.jpg'
-    ],
-    colors: [
-      { name: 'Space Black', hex: '#111827', bg: 'bg-neutral-900' },
-      { name: 'Silver Lunar', hex: '#cbd5e1', bg: 'bg-slate-300' }
-    ],
-    description: 'Veltrix flagship Horizon ANC headphones combine aerospace-grade lightweight aluminum earcups with plush memory foam protein leather cushions. Engineered with custom 45mm neodymium dynamic drivers delivering wide concert-hall spatial reproduction.',
-    highlights: [
-      '45mm Custom Titanium Coated Neodymium Drivers',
-      'Triple-mode Active Noise Cancellation (Max, Commute, Transparency)',
-      'Industry-leading 60-Hour battery life on a single charge',
-      'Multipoint Bluetooth 5.3 pairing (seamless laptop & phone handoff)',
-      'Aircraft-grade aluminum yoke with magnetic detachable ear pads'
-    ],
-    specs: {
-      'Drivers': '45mm Neodymium Dynamic Diaphragms',
-      'Impedance': '32 Ohm',
-      'Battery Playtime': '60h (ANC off) / 45h (ANC on)',
-      'Quick Charge': '10 mins charge = 5 hours playback',
-      'Cabling': 'USB-C Lossless Audio & 3.5mm Gold-plated Cable Included',
-      'Weight': '265g',
-      'Warranty': '2-Year Veltrix Global Warranty'
-    },
-    reviews: [
-      {
-        id: 'r4',
-        author: 'David S.',
-        rating: 5,
-        date: '5 days ago',
-        verified: true,
-        title: 'Better comfort than competitors at half the weight',
-        text: 'The memory foam does not create pressure points even when wearing glasses. Battery truly lasts through an entire week of work and flights.'
-      }
-    ]
-  },
-  {
     id: 'usbc-fast-charging-cable-100w',
     name: 'USB-C Fast Charging Cable (60W)',
     subtitle: 'Woven Braided Core with E-Marker Smart Chip (1m)',
@@ -471,56 +417,6 @@ export const PRODUCTS = [
     ]
   },
   {
-    id: 'titanium-link-apple-watch-band',
-    name: 'Titanium Link Bracelet for Apple Watch',
-    subtitle: 'Precision Butterfly Clasp for 44/45/49mm Cases',
-    category: 'Apple Watch',
-    categorySlug: 'apple-watch',
-    price: 90,
-    originalPrice: 120,
-    rating: 4.8,
-    reviewCount: 204,
-    badge: 'POPULAR',
-    isBestSeller: false,
-    isNew: false,
-    inStock: true,
-    stockCount: 31,
-    images: [
-      '/images/apple-watch-collection.png'
-    ],
-    colors: [
-      { name: 'Brushed Silver', hex: '#cbd5e1', bg: 'bg-slate-300' },
-      { name: 'Diamond-Like Carbon Black', hex: '#0f172a', bg: 'bg-slate-900' }
-    ],
-    description: 'Crafted from grade-4 titanium alloy with an exquisite brushed finish. Features custom tool-free link adjustment buttons and an invisible butterfly clasp that folds flush within the bracelet.',
-    highlights: [
-      'Grade-4 Titanium alloy matching Apple Watch Ultra and Stainless cases',
-      'Integrated tool-free link removal mechanism for custom wrist sizing',
-      'Subtle double-fold butterfly deployment clasp',
-      'Scratch-resistant DLC (Diamond-Like Carbon) protective surface',
-      'Compatible with 42mm, 44mm, 45mm, and 49mm Apple Watch models'
-    ],
-    specs: {
-      'Material': 'Grade-4 Titanium Alloy',
-      'Wrist Fit': '140mm – 215mm circumference',
-      'Closure': 'Dual-deployant butterfly clasp',
-      'Weight': '68g',
-      'Compatibility': 'Apple Watch Ultra 1/2, Series 10/9/8/7/SE (42/44/45/49mm)',
-      'Warranty': '2-Year Hardware Warranty'
-    },
-    reviews: [
-      {
-        id: 'r10',
-        author: 'Victor Cruz',
-        rating: 5,
-        date: '3 weeks ago',
-        verified: true,
-        title: 'Looks OEM at one-fourth the price',
-        text: 'The color match with the Ultra 2 titanium is dead-on. Changing links without tiny pins or tools took less than two minutes.'
-      }
-    ]
-  },
-  {
     id: 'veltrix-3in1-foldable-magsafe',
     name: 'Veltrix 3-in-1 Magnetic Travel Charger',
     subtitle: 'Foldable 15W MagSafe Phone, Watch & AirPods Charging Station',
@@ -620,56 +516,6 @@ export const PRODUCTS = [
         text: 'The digital percentage indicator is very clear. It doesn’t overheat like cheap plastic magnetic packs.'
       }
     ]
-  },
-  {
-    id: 'aluminum-desktop-device-stand',
-    name: 'Precision Aluminum Desktop Stand',
-    subtitle: 'Dual 360° Hinges with Cable Routing Channel',
-    category: 'Accessories',
-    categorySlug: 'accessories',
-    price: 80,
-    originalPrice: 100,
-    rating: 4.8,
-    reviewCount: 167,
-    badge: 'POPULAR',
-    isBestSeller: false,
-    isNew: false,
-    inStock: true,
-    stockCount: 50,
-    images: [
-      '/images/apple-watch-collection.png'
-    ],
-    colors: [
-      { name: 'Space Gray', hex: '#374151', bg: 'bg-gray-700' },
-      { name: 'Silver Matte', hex: '#cbd5e1', bg: 'bg-slate-300' }
-    ],
-    description: 'CNC machined from a solid block of aircraft-grade 6000-series aluminum. Designed with ultra-stiff dual damping hinges that support everything from compact phones to 13-inch iPad tablets at any viewing angle without sagging.',
-    highlights: [
-      'Solid CNC aluminum unibody construction with sandblasted anodized finish',
-      'Heavy weighted base with anti-skid silicone pads prevents tipping',
-      'Rear channel routes cables cleanly behind your desk',
-      'Dual precision tension hinges hold up to 1.5kg weight',
-      'Folds flat for briefcase carry'
-    ],
-    specs: {
-      'Material': '6063 Anodized Aluminum Alloy',
-      'Weight': '310g',
-      'Angle Adjustment': 'Dual 270° multi-axis hinges',
-      'Base Size': '120mm x 100mm x 4mm',
-      'Compatibility': 'All smartphones, e-readers, and tablets up to 13 inches',
-      'Warranty': '5-Year Mechanical Warranty'
-    },
-    reviews: [
-      {
-        id: 'r13',
-        author: 'Liam Miller',
-        rating: 5,
-        date: '2 weeks ago',
-        verified: true,
-        title: 'Rock solid on my work desk',
-        text: 'Holds my iPad Pro firmly while drawing or taking video calls. High end finish matches Apple hardware seamlessly.'
-      }
-    ]
   }
 ];
 
@@ -720,18 +566,18 @@ export const CUSTOMER_REVIEWS = [
     name: 'Harrison Sterling',
     role: 'Product Architect',
     rating: 5,
-    product: 'Titanium Link Bracelet for Apple Watch',
+    product: 'Veltrix 3-in-1 Magnetic Travel Charger',
     date: 'Verified Buyer • 2 weeks ago',
-    text: 'Impeccable packaging, pristine authentic hardware, and transparent customer support. The titanium bracelet pairing transforms the wrist into an executive showpiece.'
+    text: 'Impeccable packaging, pristine authentic hardware, and transparent customer support. The foldable 3-in-1 travel dock charges my phone, watch, and earbuds flawlessly.'
   },
   {
     id: 'rev-4',
     name: 'Chloe Davenport',
     role: 'Audiophile & Musician',
     rating: 5,
-    product: 'Veltrix Horizon Wireless ANC',
+    product: '65W GaN Dual USB-C Fast Adapter',
     date: 'Verified Buyer • 3 weeks ago',
-    text: 'The soundstage on the Horizon headphones rival studio cans that cost double. Active noise cancellation is completely silent without cabin pressure sensation.'
+    text: 'The 65W GaN charger runs cool while fast charging my laptop and phone simultaneously. Compact design makes it an everyday carry essential.'
   }
 ];
 

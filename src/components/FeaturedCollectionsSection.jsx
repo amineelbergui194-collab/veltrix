@@ -20,8 +20,8 @@ export const FeaturedCollectionsSection = () => {
     { id: 'all', label: 'All Releases' },
     { id: 'airpods', label: 'AirPods & In-Ear' },
     { id: 'headphones', label: 'Over-Ear ANC' },
-    { id: 'apple-watch', label: 'Apple Watch' },
     { id: 'cables-adapters', label: 'Power & Cables' },
+    { id: 'accessories', label: 'Accessories' },
   ];
 
   const filteredProducts = activeCategory === 'all'

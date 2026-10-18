@@ -31,17 +31,6 @@ export const HeroSection = () => {
       statVal: '48kHz / 24-Bit',
     },
     {
-      product: PRODUCTS.find((p) => p.id === 'veltrix-horizon-headphones') || PRODUCTS[1],
-      badge: 'STUDIO REFERENCE',
-      icon: Sparkles,
-      specTitle: '60h Continuous Runtime',
-      specSubtitle: '45mm Titanium Neodymium Diaphragms',
-      glow: 'from-[#7621B0]/20 via-[#18011F]/20 to-transparent',
-      tag: 'Extended Listening Endurance',
-      statLabel: 'Battery Life',
-      statVal: '60 Hours',
-    },
-    {
       product: PRODUCTS.find((p) => p.id === 'veltrix-3in1-foldable-magsafe') || PRODUCTS[2],
       badge: 'MAGSAFE TRAVEL',
       icon: Zap,

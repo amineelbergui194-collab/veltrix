@@ -18,24 +18,6 @@ export const MarqueeSection = () => {
       productId: 'airpods-pro-2'
     },
     {
-      id: 'm2',
-      title: 'Titanium Link Bracelet',
-      tag: 'Grade 4 Titanium',
-      spec: 'Butterfly Clasp • DLC Armor',
-      image: '/images/apple-watch-collection.png',
-      badge: 'AEROSPACE',
-      productId: 'titanium-link-apple-watch-band'
-    },
-    {
-      id: 'm3',
-      title: 'Studio Horizon ANC',
-      tag: 'Over-Ear Reference',
-      spec: '45mm Titanium Drivers • 60h Run',
-      image: '/images/jbl-headphones.jpg',
-      badge: 'HI-RES ACOUSTICS',
-      productId: 'soundpulse-anc-over-ear'
-    },
-    {
       id: 'm4',
       title: '60W USB-C Braided Cable',
       tag: 'Ultra Fast Charging',
